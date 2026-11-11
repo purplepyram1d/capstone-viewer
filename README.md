@@ -1,4 +1,4 @@
-![Capstone Viewer logo](docs/capstone-banner.png)
+<img src="docs/capstone-banner.png" alt="Capstone Viewer logo" width="100%">
 
 # Capstone Viewer
 
