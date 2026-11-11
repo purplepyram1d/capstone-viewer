@@ -15,6 +15,20 @@ npm start
 
 Open [Operations](http://127.0.0.1:8080/ops). On Windows, use `npm run desktop` to open the Electron app instead. The desktop app allows up to 60 seconds for the local server to start.
 
+## Main feed and timeline sources
+
+| Area | Built-in sources | What they contribute |
+| --- | --- | --- |
+| Cybersecurity | CISA Known Exploited Vulnerabilities (KEV), CISA Cybersecurity Advisories, NIST National Vulnerability Database (NVD), ransomware.live | Known exploited vulnerabilities, advisories, critical CVEs, and ransomware claims. |
+| World and earthquakes | BBC World RSS, GDELT, USGS | World news, machine-coded conflict signals that need verification, and earthquakes of magnitude 4.5 or higher. |
+| Internet and routing | IODA, RIPE RIS Live | Outage signals and alerts for spikes in BGP route withdrawals. |
+| AI | OpenAI News RSS | Announcements and research updates from OpenAI. |
+
+With API credentials, **Cloudflare Radar** adds outage and BGP hijack reports, and **abuse.ch ThreatFox and URLhaus** add malware indicators and malicious URL reports. You can also add public Telegram, Bluesky, and Mastodon feeds, or connect X with an API token. The **Feeds** page shows configured sources and collection health.
+
+The Elon and Putin trackers use dedicated Google News RSS searches. The Operations timeline excludes those tracker-specific results.
+
+
 ## Walkthrough
 
 ### Start in Operations
