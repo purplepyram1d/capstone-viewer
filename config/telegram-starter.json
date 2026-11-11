@@ -1,0 +1,21 @@
+{
+  "reviewed": "2026-10-24",
+  "scope": "Public text previews only. Channel identity and readable recent posts were checked, not the truth of individual reports. No attachments or account login.",
+  "feeds": [
+    {"input":"@thehackernews","name":"The Hacker News · Cyber news (EN)","category":"cyber","intervalMinutes":5,"language":"en","provenance":"Publisher channel; Telegram verified badge and publisher website in profile.","reference":"https://t.me/s/thehackernews"},
+    {"input":"@vxunderground","name":"vx-underground · Research/community (EN)","category":"cyber","intervalMinutes":5,"language":"en","provenance":"Malware research community; commentary and third-party claims are not confirmed incidents.","reference":"https://t.me/s/vxunderground"},
+    {"input":"@osintindustries","name":"OSINT Industries · Tools/vendor (EN)","category":"cyber","intervalMinutes":30,"language":"en","provenance":"Self-described OSINT tool vendor channel; includes product announcements and promotion.","reference":"https://t.me/s/osintindustries"},
+    {"input":"@Liveuamap","name":"Liveuamap · OSINT news relay (EN)","category":"geo","intervalMinutes":10,"language":"en","provenance":"Maps and relays third-party incident reporting; relayed reports may share underlying sources.","reference":"https://t.me/s/Liveuamap"},
+    {"input":"@OSINTdefender","name":"OSINTdefender · Unverified relay (EN)","category":"geo","intervalMinutes":10,"language":"en","provenance":"Public relay under this name; affiliation to similarly named accounts was not independently established. Claims and geopolitical commentary require corroboration.","reference":"https://t.me/s/OSINTdefender"},
+    {"input":"@KyivIndependent_official","name":"The Kyiv Independent · Publisher (EN)","category":"geo","intervalMinutes":5,"language":"en","provenance":"Telegram verified publisher channel; reporting centered on Ukraine and Eastern Europe.","reference":"https://t.me/KyivIndependent_official"},
+    {"input":"@bbcrussian","name":"BBC Russian · Publisher (RU)","category":"geo","intervalMinutes":5,"language":"ru","provenance":"Telegram verified BBC Russian service channel; original Russian text is retained, without automatic translation.","reference":"https://t.me/s/bbcrussian"},
+    {"input":"@meduzalive","name":"Meduza LIVE · Publisher (RU)","category":"geo","intervalMinutes":5,"language":"ru","provenance":"Meduza's self-described main Telegram channel; original Russian text is retained, without automatic translation.","reference":"https://t.me/s/meduzalive"}
+  ],
+  "excluded": [
+    {"input":"@bellingcat_en","reason":"Newest preview post was 2025-05-08; no reports inside the app's 30-day retention window."},
+    {"input":"@cybersecuritynews","reason":"Preview posts dated to 2016; no recent reports."},
+    {"input":"@osinttechnical","reason":"Preview posts dated to 2022; no recent reports."},
+    {"input":"@aljazeeraenglish","reason":"No readable channel preview at this handle."},
+    {"input":"@GeoConfirmed","reason":"Contact page rather than a readable public channel preview."}
+  ]
+}

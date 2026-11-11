@@ -1,0 +1,11 @@
+[
+ {"name":"France 24 · English","input":"@France24_en"},
+ {"name":"Al Jazeera · English","input":"@aljazeeraenglish"},
+ {"name":"Sky News","input":"@SkyNews"},
+ {"name":"DW News","input":"@dwnews"},
+ {"name":"ABC News · US","input":"@ABCNews"},
+ {"name":"NBC News · US","input":"@NBCNews"},
+ {"name":"CNA · Asia","input":"@channelnewsasia"},
+ {"name":"Euronews · Europe","input":"@euronews"},
+ {"name":"NHK WORLD-JAPAN","input":"@NHKWORLDJAPAN"}
+]

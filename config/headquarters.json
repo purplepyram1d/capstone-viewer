@@ -1,0 +1,13 @@
+[
+  { "aliases": ["Microsoft"], "lat": 47.674, "lon": -122.1215, "place": "Redmond · Microsoft HQ city" },
+  { "aliases": ["Apple"], "lat": 37.323, "lon": -122.0322, "place": "Cupertino · Apple HQ city" },
+  { "aliases": ["Google"], "lat": 37.3861, "lon": -122.0839, "place": "Mountain View · Google HQ city" },
+  { "aliases": ["Cisco"], "lat": 37.3382, "lon": -121.8863, "place": "San Jose · Cisco HQ city" },
+  { "aliases": ["Adobe"], "lat": 37.3382, "lon": -121.8863, "place": "San Jose · Adobe HQ city" },
+  { "aliases": ["Fortinet"], "lat": 37.3688, "lon": -122.0363, "place": "Sunnyvale · Fortinet HQ city" },
+  { "aliases": ["Palo Alto Networks"], "lat": 37.3541, "lon": -121.9552, "place": "Santa Clara · Palo Alto Networks HQ city" },
+  { "aliases": ["Siemens"], "lat": 48.1351, "lon": 11.582, "place": "Munich · Siemens HQ city" },
+  { "aliases": ["SAP"], "lat": 49.3064, "lon": 8.6428, "place": "Walldorf · SAP HQ city" },
+  { "aliases": ["Atlassian"], "lat": -33.8688, "lon": 151.2093, "place": "Sydney · Atlassian HQ city" },
+  { "aliases": ["D-Link"], "lat": 25.033, "lon": 121.5654, "place": "Taipei · D-Link HQ city" }
+]

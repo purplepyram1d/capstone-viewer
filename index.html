@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><script src="/assets/theme.js"></script><link rel="icon" type="image/svg+xml" href="/assets/eye-of-providence-small.svg">
+<title>Capstone Viewer</title>
+<meta name="description" content="Capstone Viewer is a cyber-first OSINT viewer for following current events: live cameras, global monitors, air and sea tracking, disasters, internet health and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+<script defer src="/assets/navigation.js"></script><link rel="stylesheet" href="/assets/navigation.css"><link rel="stylesheet" href="/assets/themes.css"></head>
+<body>
+<div class="wrap">
+  <nav aria-label="Main navigation"><a href="/ops">Operations</a> · <a href="/wall" target="_blank" rel="noopener">Live wall ↗</a> · <a href="/feeds">Feeds</a> · <a href="/watch">Watchlists</a> · <a href="/timeline">Timeline</a> · <a href="/musk">Elon tracker</a> · <strong>Sources</strong></nav>
+  <header class="mast">
+    <div>
+      <div class="brand">
+        <span class="mark" role="img" aria-label="Capstone Viewer: the Eye of Providence"></span>
+        <div><h1>Capstone <span>Viewer</span></h1></div>
+      </div>
+      <p>Open-source windows on what's happening right now. Cyber first: ransomware claims, exploited CVEs, live IOCs and breaches. Then the physical world: cameras, traffic, weather and conflict.</p>
+    </div>
+    <div class="utc"><span class="lamp"></span>Zulu time<strong id="utc">--:--:--</strong><span id="utcdate"></span></div>
+  </header>
+
+  <section class="clocks" id="clocks" aria-label="City clocks"></section>
+  <p class="rail-note">Check the bar before you open a camera: an amber bar means it's daylight there and the streets are busy.</p>
+
+  <div class="controls">
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search sources, e.g. beach, conflict, GitHub, DDoS" autocomplete="off">
+    </label>
+    <div class="chips" id="chips" role="group" aria-label="Filter by desk"></div>
+  </div>
+
+  <details class="add" id="addbox">
+    <summary>Add a source</summary>
+    <form id="addform" novalidate>
+      <div class="row">
+        <label for="f-name">Name<input id="f-name" required placeholder="e.g. Tokyo Shibuya Crossing cam"></label>
+        <label for="f-url">Link<input id="f-url" type="url" required placeholder="https://"></label>
+        <label for="f-desk">Desk<select id="f-desk"></select></label>
+      </div>
+      <label for="f-desc">What it's good for<input id="f-desc" placeholder="One line on why you'd open it"></label>
+      <label for="f-tags">Tags<input id="f-tags" placeholder="comma separated, e.g. live, japan, cities"></label>
+      <div class="formfoot"><button type="submit" class="btn">Save source</button><span id="f-msg" role="status"></span></div>
+    </form>
+  </details>
+
+  <main id="desks"></main>
+
+  <footer><span id="sync" role="status"></span> Links open in a new tab. Sources last checked October 2026.</footer>
+</div>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

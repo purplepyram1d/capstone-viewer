@@ -1,0 +1,16 @@
+node_modules/
+runtime/
+*.log
+.env
+desktop/
+
+# Local data and build leftovers
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.tmp
+
+# Local project notes
+/CLAUDE.md
+.env.*
+!.env.example

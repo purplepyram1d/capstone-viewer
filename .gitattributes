@@ -1,0 +1,5 @@
+# Source stays LF on every checkout (the files are LF; autocrlf would rewrite them).
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.png binary
+*.ico binary

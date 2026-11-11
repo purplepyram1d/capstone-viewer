@@ -1,0 +1,32 @@
+(() => {
+ const {esc,read,save}=Capstone,M=CapstoneDeskModel,KEY='capstone-desks-v1',SESSION='capstone-desk-window',LAST='capstone-last-desk';
+ const route=location.pathname==='/'?'/ops':location.pathname.replace(/\/$/,'');
+ const contextual=route==='/ops'&&['event','source','watch','period'].some(key=>new URLSearchParams(location.search).has(key));
+ const legacy=()=>({ops:{balance:read('capstone-ops-balance',60),projection:read('capstone-projection','mercator')},wall:{streams:read('capstone-streams',M.defaultStreams),columns:read('capstone-wall-columns','auto')}});
+ const load=()=>M.normalize(read(KEY,null),legacy());
+ let activeId=null,adapter=null,removed=null,switching=false;
+ try{activeId=sessionStorage.getItem(SESSION)??read(LAST,null);sessionStorage.setItem(SESSION,activeId||'current-view');}catch{activeId=read(LAST,null);}
+ const current=()=>load().profiles.find(p=>p.id===activeId)||null;
+ // A navigation link to another view stays a normal view, rather than silently applying a different desk.
+ const active=()=>{const p=current();return p?.view===route&&!contextual?p:null;};
+ const host=document.createElement('section');host.className='desk-toolbar';host.setAttribute('aria-label','Saved desks');
+ host.innerHTML='<label>Desk <select id="desk-select" aria-label="Saved desk"></select></label><button id="desk-save-as">Save as…</button><button id="desk-manage">Manage desks</button><span id="desk-message" role="status"></span>';
+ document.querySelector('.topbar')?.after(host);
+ const $=id=>document.getElementById(id),message=v=>$('desk-message').textContent=v;
+ const dialog=document.createElement('dialog');dialog.className='desk-dialog';dialog.innerHTML='<div class="dialog-heading"><h2>Saved desks</h2><button id="desk-close" aria-label="Close saved desks">✕</button></div><p class="subtle">Each desk remembers its view, Operations filters and map, panel balance, and stream lineup. Changes save automatically while a desk is selected. Layouts are saved on this device. Switching affects this window.</p><form id="desk-new-form"><label for="desk-name">Save current view as</label><div class="desk-name-row"><input id="desk-name" maxlength="60" required placeholder="Desk name"><button type="submit">Save new desk</button></div></form><p id="desk-dialog-message" role="status"></p><div id="desk-list"></div><button id="desk-undo" hidden>Undo removal</button>';
+ document.body.append(dialog);
+ function render(){const p=active();$('desk-select').innerHTML='<option value="">Current view</option>'+load().profiles.map(d=>`<option value="${esc(d.id)}">${esc(d.name)}</option>`).join('');$('desk-select').value=p?.id||'';$('desk-save-as').disabled=!['/ops','/wall'].includes(route);$('desk-new-form').hidden=!['/ops','/wall'].includes(route);$('desk-list').innerHTML=load().profiles.map(d=>`<form class="desk-row" data-desk="${esc(d.id)}"><label>${d.view==='/wall'?'Stream wall':'Operations'}<input aria-label="Rename ${esc(d.name)}" value="${esc(d.name)}" maxlength="60" required></label><button type="submit">Rename</button><button type="button" data-remove-desk="${esc(d.id)}">Remove</button></form>`).join('');$('desk-undo').hidden=!removed;}
+ function write(data){if(!save(KEY,data))throw Error('Device storage is unavailable or full. Your desk was not saved.');}
+ function setActive(id){activeId=id;try{sessionStorage.setItem(SESSION,id||'current-view');}catch{}save(LAST,id);}
+ function capture(){const base=active()||{ops:M.ops(legacy().ops),wall:M.wall(legacy().wall)};return {...M.clone(base),view:route,...(adapter?{[adapter.view]:adapter.capture()}: {})};}
+ function update(){if(switching||!active()||!adapter)return false;try{const data=load(),i=data.profiles.findIndex(p=>p.id===activeId);if(i<0)return false;data.profiles[i]=M.profile({...data.profiles[i],[adapter.view]:adapter.capture()});write(data);message('Saved to '+data.profiles[i].name);return true;}catch(error){message(error.message);return false;}}
+ window.CapstoneDesks={initial:view=>active()?M.clone(active()[view]):null,active:()=>!!active(),register(view,capture){adapter={view,capture};},update};
+ $('desk-select').onchange=()=>{if(document.querySelector('dialog[open]')||!window.dispatchEvent(new Event('capstone-desk-switch',{cancelable:true}))){render();message('Save or close the open editor before switching desks.');return;}const id=$('desk-select').value;update();if(!id){switching=true;setActive(null);location.href=route;return;}const p=load().profiles.find(p=>p.id===id);if(!p)return;switching=true;setActive(id);location.href=p.view;};
+ function open(){render();$('desk-dialog-message').textContent='';dialog.showModal();}
+ $('desk-save-as').onclick=()=>{open();$('desk-name').value='';$('desk-name').focus();};$('desk-manage').onclick=open;$('desk-close').onclick=()=>dialog.close();
+ $('desk-new-form').onsubmit=e=>{e.preventDefault();try{const data=load(),p=capture();p.name=M.name($('desk-name').value,data.profiles);p.id='desk-'+crypto.randomUUID();const valid=M.profile(p);data.profiles.push(valid);write(data);setActive(valid.id);dialog.close();render();message('Saved as '+valid.name);}catch(error){$('desk-dialog-message').textContent=error.message;}};
+ $('desk-list').onsubmit=e=>{e.preventDefault();try{const data=load(),p=data.profiles.find(p=>p.id===e.target.dataset.desk);if(!p)return;p.name=M.name(e.target.querySelector('input').value,data.profiles,p.id);write(data);render();$('desk-dialog-message').textContent='Desk renamed.';}catch(error){$('desk-dialog-message').textContent=error.message;}};
+ $('desk-list').onclick=e=>{const b=e.target.closest('[data-remove-desk]');if(!b)return;try{const data=load();if(data.profiles.length===1)throw Error('Keep at least one desk.');removed=data.profiles.find(p=>p.id===b.dataset.removeDesk);data.profiles=data.profiles.filter(p=>p.id!==b.dataset.removeDesk);write(data);if(activeId===removed.id)setActive(null);render();$('desk-dialog-message').textContent='Desk removed. You can undo this removal.';}catch(error){$('desk-dialog-message').textContent=error.message;}};
+ $('desk-undo').onclick=()=>{try{const data=load();if(!removed)return;removed.name=M.name(removed.name,data.profiles);data.profiles.push(removed);write(data);removed=null;render();$('desk-dialog-message').textContent='Desk restored.';}catch(error){$('desk-dialog-message').textContent=error.message;}};
+ window.addEventListener('storage',e=>{if(e.key===KEY&&!dialog.open)render();});render();
+})();

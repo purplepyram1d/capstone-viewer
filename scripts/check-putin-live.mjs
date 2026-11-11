@@ -1,0 +1,1 @@
+import {feeds,collect} from '../lib/collectors.mjs';for(const f of feeds.filter(f=>f.tracker==='putin')){try{const {events}=await collect(f);console.log(f.id,events.length,events[0]?.title);if(!events.length)process.exitCode=1;}catch(error){console.log(f.id,error.message);process.exitCode=1;}}

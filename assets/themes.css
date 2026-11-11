@@ -1,0 +1,34 @@
+/* Themes. "dark" is Capstone Night (the Rose Pine purple-black default in styles.css/console.css); the other five
+   are Corpus Magnus's reader themes (Johnny, 2026-10-28), mapped onto Capstone's tokens from the palettes in
+   corpus magnus/_reader/reader.css. Accent = Corpus "ox", good/bad = its right/wrong colors. On light themes the
+   amber (--sun) is darkened where the original gold is too faint to read as status text.
+   Page tokens sit on :root; map tokens override the .console block, so they need the extra specificity. */
+:root { --night-alpha: .5; }
+
+:root[data-theme="parchment"] { --paper:#f3e9d2; --panel:#f9f2e1; --rule:#d8c7a3; --ink:#3b2a1a; --muted:#7a6248; --signal:#6e1a1a; --signal-soft:#ead7c0; --sun:#8a6420; --live:#2e6b2e; --night:#1f3a7a; color-scheme:light; }
+[data-theme="parchment"] .console { --geo:#9a6b1f; --ai:#2f6b66; --water:#e7d8b6; --land:#f8f0dd; --borders:#b9a47c; --hot:#b3261e; --night-shade:#3b2a1a; --night-alpha:.14; }
+
+:root[data-theme="candle"] { --paper:#1c140d; --panel:#261b11; --rule:#3d2e1f; --ink:#e9d9b4; --muted:#a88f68; --signal:#d0805f; --signal-soft:#3a2516; --sun:#c9a24f; --live:#8fd18f; --night:#8fa8e0; color-scheme:dark; }
+[data-theme="candle"] .console { --geo:#c9a24f; --ai:#8fc7b8; --water:#120c07; --land:#2a1f15; --borders:#4d3b27; --hot:#ff8a7a; --night-shade:#000000; --night-alpha:.45; }
+
+/* Official Rose Pine (rosepinetheme.com, MIT), as in Corpus Magnus: rose accent, foam good, love bad. */
+:root[data-theme="rosepine"] { --paper:#191724; --panel:#1f1d2e; --rule:#403d52; --ink:#e0def4; --muted:#908caa; --signal:#ebbcba; --signal-soft:#26233a; --sun:#f6c177; --live:#9ccfd8; --night:#31748f; color-scheme:dark; }
+[data-theme="rosepine"] .console { --geo:#f6c177; --ai:#c4a7e7; --water:#16141f; --land:#26233a; --borders:#403d52; --hot:#eb6f92; --night-shade:#000000; --night-alpha:.45; }
+
+:root[data-theme="rosedawn"] { --paper:#faf4ed; --paper2:#f2e9e1; --panel:#fffaf3; --rule:#dfdad9; --ink:#575279; --muted:#797593; --signal:#b4637a; --signal-soft:#f2e9e1; --sun:#b9761c; --live:#286983; --night:#907aa9; color-scheme:light; }
+[data-theme="rosedawn"] .console { --geo:#c27f22; --ai:#56949f; --water:#f2e9e1; --land:#fffaf3; --borders:#cecacd; --hot:#b4637a; --night-shade:#575279; --night-alpha:.14; }
+
+:root[data-theme="rosegold"] { --paper:#fbf2ee; --panel:#fffaf8; --rule:#ecd5cc; --ink:#4a2b31; --muted:#8d6a6f; --signal:#b76e79; --signal-soft:#f4e3dc; --sun:#9a6a3c; --live:#5f7f6a; --night:#7d4a5a; color-scheme:light; }
+[data-theme="rosegold"] .console { --geo:#b8865a; --ai:#5f7f7a; --water:#f4e3dc; --land:#fffaf8; --borders:#d9b3a3; --hot:#b04a5a; --night-shade:#4a2b31; --night-alpha:.12; }
+
+/* Corpus Magnus's page textures: a vignette on Parchment, Candlelight and Rose Gold; Rose Gold's gilded title. */
+[data-theme="parchment"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(90,60,20,.12)); background-attachment:fixed; }
+[data-theme="candle"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.35)); background-attachment:fixed; }
+[data-theme="rosegold"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(183,110,121,.08)); background-attachment:fixed; }
+[data-theme="rosegold"] .console h1, [data-theme="rosegold"] .console-brand b, [data-theme="rosegold"] .kiosk-brand b { background:linear-gradient(100deg,#9c5a63 0%,#b76e79 30%,#ecc7bd 50%,#b76e79 70%,#9c5a63 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+[data-theme="rosepine"] ::selection { background:#403d52; color:#e0def4; }
+[data-theme="rosedawn"] ::selection { background:#dfdad9; color:#575279; }
+[data-theme="rosegold"] ::selection { background:#ecc7bd; color:#4a2b31; }
+
+/* The theme button (Corpus Magnus style: the icon hints at the next theme, the tooltip names the current one). */
+.theme-button { font-size:15px!important; line-height:1; padding:7px 10px!important; min-width:36px; }
