@@ -100,7 +100,12 @@ async function start() {
   // 48179 is dedicated to this app; failures are shown rather than silently moving to a new origin.
   const dataDir = process.env.CAPSTONE_DATA_DIR || path.join(app.getPath('userData'),'feeds');
   collectorConfig = { root, node, dataDir, credentialFiles: {x:path.join(app.getPath('userData'),'x-credential.bin'),radar:path.join(app.getPath('userData'),'radar-credential.bin'),abusech:path.join(app.getPath('userData'),'abusech-credential.bin')} };
-  startupTimer = setTimeout(()=>{if(!everReady){dialog.showErrorBox('Capstone Viewer','The local server did not start. '+lastCollectorErrors);app.quit();}},20000);
+  startupTimer = setTimeout(() => {
+    if (everReady || quitting) return;
+    lifecycle('collector-startup-timeout', 'no ready message after 60 s');
+    dialog.showErrorBox('Capstone Viewer', 'The local server did not start within 60 seconds. ' + lastCollectorErrors);
+    app.quit();
+  }, 60_000);
   spawnCollector(before);
 }
 // The collector (server.mjs) runs as a child process. If it dies after it has started once, it is restarted with a
@@ -134,7 +139,7 @@ function spawnCollector(previous) {
   const end = () => {
     if (ended) return; ended = true; if (collector === child) collector = null;
     if (quitting) return;
-    if (!everReady) { dialog.showErrorBox('Capstone collector stopped', errors || 'The local feed server exited before it was ready.'); app.quit(); return; }
+    if (!everReady) { clearTimeout(startupTimer); dialog.showErrorBox('Capstone collector stopped', errors || 'The local feed server exited before it was ready.'); app.quit(); return; }
     scheduleRestart(Date.now() - spawnedAt, errors);
   };
   // 'error' also fires for a failed send (EPIPE) to a child that is already exiting; only a spawn failure (no pid) or a
@@ -159,7 +164,7 @@ function spawnCollector(previous) {
       }catch{if(child.connected)child.send({type:'credential-response',requestId:message.requestId,error:'Could not access encrypted desktop credentials. Reconnect '+({radar:'Cloudflare Radar',abusech:'abuse.ch'}[message.name]||'X API access')+'.'});}
       return;
     }
-    if(message.type!=='ready'||started)return;started=true;baseUrl=message.url;lifecycle('ready',baseUrl);
+    if(message.type!=='ready'||started||quitting)return;started=true;baseUrl=message.url;lifecycle('ready',baseUrl);
     // A restarted collector: open windows reconnect their live streams by themselves (SSE retry).
     if(everReady){trayStatus='Collecting';updateTray();return;}
     everReady=true;clearTimeout(startupTimer);
@@ -214,7 +219,7 @@ app.on('window-all-closed',()=>{
 let collectorStopping=false;
 app.on('before-quit',event=>{
   if(!quitting)lifecycle('before-quit');
-  quitting=true;clearTimeout(restartTimer);
+  quitting=true;clearTimeout(startupTimer);clearTimeout(restartTimer);
   const child=collector;
   if(!child||child.exitCode!==null||child.signalCode!==null)return;
   event.preventDefault();

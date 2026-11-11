@@ -15,7 +15,7 @@ test('profiles round trip independent filters, map position, panels and an unlim
 test('malformed storage recovers safely and profile data cannot choose external routes or invalid map bounds',()=>{
  assert.equal(M.normalize(null).profiles.length,3);assert.equal(M.normalize({version:1,profiles:[null,{},'bad']}).profiles.length,3);
  const p=M.profile({id:'desk-test',name:'Test',view:'https://evil.example',ops:{balance:1000,period:'forever',camera:{center:[900,500],zoom:99,pitch:90},fallback:[0,0,-2,-1]},wall:{columns:99,streams:[{name:'Bad',input:'javascript:bad'}]}});
- assert.equal(p.view,'/ops');assert.equal(p.ops.balance,70);assert.equal(p.ops.period,'today');assert.deepEqual(p.ops.camera.center,[180,85]);assert.equal(p.ops.camera.zoom,8);assert.deepEqual(p.ops.fallback,[0,0,720,360]);assert.equal(p.wall.columns,'auto','an invalid column count falls back to fit-all');assert.equal(p.wall.streams.length,9);assert.equal(M.wall({columns:'auto'}).columns,'auto','auto survives normalization');
+ assert.equal(p.view,'/ops');assert.equal(p.ops.balance,70);assert.equal(p.ops.period,'today');assert.deepEqual(p.ops.camera.center,[180,85]);assert.equal(p.ops.camera.zoom,8);assert.deepEqual(p.ops.fallback,[0,0,720,360]);assert.equal(p.wall.columns,'auto','an invalid column count falls back to fit-all');assert.deepEqual(p.wall.streams.map(stream=>stream.input), ['@France24_en','@aljazeeraenglish','@SkyNews','@dwnews','@ABCNews','@NBCNews']);assert.equal(M.wall({columns:'auto'}).columns,'auto','auto survives normalization');
  const store=M.normalize({version:1,profiles:[p,p]});assert.equal(store.profiles.length,1);
 });
 test('desk names validate and stream parsing accepts existing wall inputs only',()=>{

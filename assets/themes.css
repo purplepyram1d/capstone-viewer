@@ -1,8 +1,4 @@
-/* Themes. "dark" is Capstone Night (the Rose Pine purple-black default in styles.css/console.css); the other five
-   are Corpus Magnus's reader themes (Johnny, 2026-10-28), mapped onto Capstone's tokens from the palettes in
-   corpus magnus/_reader/reader.css. Accent = Corpus "ox", good/bad = its right/wrong colors. On light themes the
-   amber (--sun) is darkened where the original gold is too faint to read as status text.
-   Page tokens sit on :root; map tokens override the .console block, so they need the extra specificity. */
+/* Corpus Magnus reader palettes mapped to Capstone's page and map colors. */
 :root { --night-alpha: .5; }
 
 :root[data-theme="parchment"] { --paper:#f3e9d2; --panel:#f9f2e1; --rule:#d8c7a3; --ink:#3b2a1a; --muted:#7a6248; --signal:#6e1a1a; --signal-soft:#ead7c0; --sun:#8a6420; --live:#2e6b2e; --night:#1f3a7a; color-scheme:light; }
@@ -30,5 +26,37 @@
 [data-theme="rosedawn"] ::selection { background:#dfdad9; color:#575279; }
 [data-theme="rosegold"] ::selection { background:#ecc7bd; color:#4a2b31; }
 
-/* The theme button (Corpus Magnus style: the icon hints at the next theme, the tooltip names the current one). */
-.theme-button { font-size:15px!important; line-height:1; padding:7px 10px!important; min-width:36px; }
+:root[data-theme="ivory"] { --paper:#fcfaf4; --panel:#f0ede2; --rule:#d8cfba; --ink:#262821; --muted:#57594f; --signal:#62422f; --signal-soft:#e8dfcf; --sun:#76643a; --live:#37634c; --night:#25496c; color-scheme:light; }
+[data-theme="ivory"] .console { --geo:#76643a; --ai:#47606d; --water:#ebe6d9; --land:#fcfaf4; --borders:#b1a587; --hot:#a83138; --night-shade:#262821; --night-alpha:.14; }
+
+:root[data-theme="botanical"] { --paper:#f1f4e9; --panel:#e0e9d8; --rule:#c5d2ba; --ink:#202f25; --muted:#475b4b; --signal:#345d40; --signal-soft:#d5e2ce; --sun:#71602b; --live:#345d40; --night:#235b63; color-scheme:light; }
+[data-theme="botanical"] .console { --geo:#71602b; --ai:#235b63; --water:#d5e4dc; --land:#eef2e5; --borders:#9bae90; --hot:#963c38; --night-shade:#202f25; --night-alpha:.14; }
+
+:root[data-theme="seaglass"] { --paper:#eaf5f4; --panel:#d8ebed; --rule:#b6d2d7; --ink:#173638; --muted:#405d63; --signal:#21596d; --signal-soft:#cfe4e7; --sun:#785b2e; --live:#286458; --night:#214877; color-scheme:light; }
+[data-theme="seaglass"] .console { --geo:#785b2e; --ai:#214877; --water:#cce2e7; --land:#eaf5f4; --borders:#8cabb3; --hot:#a53551; --night-shade:#173638; --night-alpha:.14; }
+
+:root[data-theme="midnight"] { --paper:#131c30; --panel:#202c45; --rule:#42577c; --ink:#eaf1ff; --muted:#aebdd7; --signal:#bfc9ff; --signal-soft:#303c60; --sun:#f4c278; --live:#91d6b3; --night:#9ed9ff; color-scheme:dark; }
+[data-theme="midnight"] .console { --geo:#f4c278; --ai:#9ed9ff; --water:#101827; --land:#273653; --borders:#6f87b1; --hot:#ffa2b0; --night-shade:#080e1a; --night-alpha:.4; }
+
+:root[data-theme="evergreen"] { --paper:#13231d; --panel:#22372d; --rule:#425e4e; --ink:#e4f1e7; --muted:#afc9b9; --signal:#b9df9f; --signal-soft:#304737; --sun:#f0ca83; --live:#a2dcb0; --night:#8fe0cc; color-scheme:dark; }
+[data-theme="evergreen"] .console { --geo:#f0ca83; --ai:#8fe0cc; --water:#0f1b18; --land:#2b4235; --borders:#6a967a; --hot:#ffa79b; --night-shade:#08110d; --night-alpha:.4; }
+
+:root[data-theme="highcontrast"] { --paper:#0b0b0b; --panel:#1d1d1d; --rule:#c8c8c8; --ink:#fff; --muted:#dedede; --signal:#ffdf64; --signal-soft:#302900; --sun:#ffdf64; --live:#a9ffad; --night:#9fe6ff; color-scheme:dark; }
+[data-theme="highcontrast"] .console { --geo:#ffdf64; --ai:#9fe6ff; --water:#000; --land:#292929; --borders:#c8c8c8; --hot:#ff9caa; --night-shade:#000; --night-alpha:.3; }
+
+#theme-select {
+  font: 12px var(--font-body);
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  min-height: 36px;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+#theme-select:hover { border-color: var(--signal); }
+#theme-select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.utc #theme-select { margin-top: 8px; }
+@media (max-width: 760px) {
+  .top-actions { flex-wrap: wrap; justify-content: flex-end; }
+}

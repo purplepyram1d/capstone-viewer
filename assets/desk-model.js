@@ -2,8 +2,15 @@
 globalThis.CapstoneDeskModel=(()=>{
  const clone=v=>JSON.parse(JSON.stringify(v)),one=(v,values,fallback)=>values.includes(v)?v:fallback;
  const number=(v,min,max,fallback)=>Number.isFinite(Number(v))&&v!==null?Math.max(min,Math.min(max,Number(v))):fallback;
- // The whole preset library (assets/stream-presets.json); all nine were live and embeddable on 2026-10-29.
- const defaultStreams=[{name:'France 24 · English',input:'@France24_en'},{name:'Al Jazeera · English',input:'@aljazeeraenglish'},{name:'Sky News',input:'@SkyNews'},{name:'DW News',input:'@dwnews'},{name:'ABC News · US',input:'@ABCNews'},{name:'NBC News · US',input:'@NBCNews'},{name:'CNA · Asia',input:'@channelnewsasia'},{name:'Euronews · Europe',input:'@euronews'},{name:'NHK WORLD-JAPAN',input:'@NHKWORLDJAPAN'}];
+ // Default live wall lineup. Additional broadcasters are available in stream-presets.json.
+ const defaultStreams = [
+  {name:'France 24 · English', input:'@France24_en'},
+  {name:'Al Jazeera · English', input:'@aljazeeraenglish'},
+  {name:'Sky News', input:'@SkyNews'},
+  {name:'DW News', input:'@dwnews'},
+  {name:'ABC News · US', input:'@ABCNews'},
+  {name:'NBC News · US', input:'@NBCNews'}
+ ];
  function parseStream(input){
   if(typeof input!=='string')return null;input=input.trim();
   if(/^[\w-]{11}$/.test(input))return {videoId:input,url:`https://www.youtube.com/watch?v=${input}`};

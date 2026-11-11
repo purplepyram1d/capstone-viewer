@@ -39,23 +39,6 @@ window.Capstone = (() => {
     const pole=tilt>0?-90:90;
     return {type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[...line,[180,pole],[-180,pole],line[0]]]}};
   }
-  // Themes: Capstone Night plus Corpus Magnus's five. The button cycles them like the Corpus reader's: its icon
-  // hints at the next theme and its tooltip names the current one. Saved per device; every open window follows.
-  const THEMES=[['dark','Capstone Night','☼'],['parchment','Parchment','☾'],['candle','Candlelight','✿'],['rosepine','Rosé Pine','☀'],['rosedawn','Rosé Pine Dawn','✦'],['rosegold','Rose Gold','◭']];
-  const themeListeners=new Set();let themeButton=null;
-  const currentTheme=()=>THEMES.some(t=>t[0]===document.documentElement.dataset.theme)?document.documentElement.dataset.theme:'dark';
-  function applyTheme(name,persist){
-    const i=Math.max(0,THEMES.findIndex(t=>t[0]===name)),theme=THEMES[i],next=THEMES[(i+1)%THEMES.length];
-    document.documentElement.dataset.theme=theme[0];if(persist)save('capstone-theme',theme[0]);
-    if(themeButton){themeButton.textContent=theme[2];themeButton.title=`Theme: ${theme[1]} (click for ${next[1]})`;themeButton.setAttribute('aria-label',themeButton.title);}
-    // Maps read colors when they draw, so they repaint after the new tokens apply.
-    requestAnimationFrame(()=>{for(const callback of themeListeners){try{callback(theme[0]);}catch(error){console.error('Could not apply theme',error);}}});
-  }
-  const fullscreenButton=document.getElementById('fullscreen');
-  if(fullscreenButton){themeButton=document.createElement('button');themeButton.type='button';themeButton.className='theme-button';fullscreenButton.before(themeButton);themeButton.onclick=()=>{const i=THEMES.findIndex(t=>t[0]===currentTheme());applyTheme(THEMES[(i+1)%THEMES.length][0],true);};}
-  applyTheme(currentTheme(),false);
-  window.addEventListener('storage',event=>{if(event.key==='capstone-theme')applyTheme(read('capstone-theme','dark'),false);});
-  const onTheme=callback=>{themeListeners.add(callback);return()=>themeListeners.delete(callback);};
-  return { esc, read, save, channel, subscribe, onConnection, onPulse, api, nightGeo, onTheme, themes: THEMES };
+  return { esc, read, save, channel, subscribe, onConnection, onPulse, api, nightGeo, onTheme: window.CapstoneTheme.onChange };
 })();
 window.CapstoneReading=(()=>{let state={sources:[],subjects:[]};Capstone.subscribe(data=>{if(data.reading)state=data.reading;});const fold=v=>String(v||'').normalize('NFKC').toLocaleLowerCase().replace(/\s+/g,' ').trim();return {muted(r){return state.sources.some(s=>s.key===(r.source_key||r.source_id||r.source||'Unknown source'))||state.subjects.some(s=>fold([r.title,r.summary,...(r.display_tags||r.tags||[]).map(t=>t.label)].join(' ')).includes(fold(s)));}};})();
