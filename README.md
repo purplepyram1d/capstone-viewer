@@ -1,3 +1,5 @@
+![Capstone Viewer logo](docs/capstone-banner.png)
+
 # Capstone Viewer
 
 Capstone Viewer is a local OSINT dashboard for monitoring cybersecurity and world events. It combines public feeds, an interactive map, a searchable timeline, and a live news wall. The Windows desktop app keeps collecting from the system tray, and reports and settings stay on your device.
