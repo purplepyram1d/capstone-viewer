@@ -2,13 +2,17 @@
 
 # Capstone Viewer
 
-Capstone Viewer is a local OSINT dashboard for cybersecurity, internet disruptions, and world events. The Windows app can keep collecting from the system tray, with reports and settings stored on your device.
+Capstone Viewer pulls public reports on cyber threats, internet outages, severe weather, and world events into a local dashboard. See where a report applies, check who published it, and open the original source. The Windows app can keep collecting from the system tray.
 
-## Demo
+## Capstone Viewer in action
 
-![Capstone Viewer Operations showing the world map and the event timeline](docs/screenshots/operations.png)
-
-[Live Wall](docs/screenshots/live-wall.png) · [Kiosk](docs/screenshots/kiosk.png) · [Timeline](docs/screenshots/timeline.png) · [Feeds](docs/screenshots/feeds.png) · [Sources](docs/screenshots/sources.png)
+| Operations | Timeline |
+| --- | --- |
+| <img src="docs/screenshots/operations.png" alt="World map beside a timeline of cybersecurity and weather reports" width="400"><br>Filter by topic or place and see matching reports alongside the map. | <img src="docs/screenshots/timeline.png" alt="Search filters and an official AWS advisory in the report timeline" width="400"><br>Search by keyword or CVE, compare source and receipt dates, and save reports for review. |
+| **Live Wall** | **Kiosk** |
+| <img src="docs/screenshots/live-wall.png" alt="Six live broadcasts with markets, world clocks, and a headline crawl" width="400"><br>Watch six broadcasts with backups, market prices, clocks, and a headline crawl. | <img src="docs/screenshots/kiosk.png" alt="Geopolitical and Earth Kiosk showing a measured Florida flood report on the globe" width="400"><br>Keep a Cyber, Geopolitical &amp; Earth, or AI &amp; Robotics desk rotating on a second screen. |
+| **Feeds** | **Sources** |
+| <img src="docs/screenshots/feeds.png" alt="Built-in collectors showing recent successful polls and source dates" width="400"><br>Check when a feed last collected and follow additional public sources. | <img src="docs/screenshots/sources.png" alt="Searchable directory of public sources organized by topic" width="400"><br>Find public reference links by topic and see which sources Capstone collects automatically. |
 
 ## Run locally
 
@@ -20,12 +24,6 @@ npm start
 ```
 
 Open [Operations](http://127.0.0.1:8080/ops). On Windows, run `npm run desktop` for the desktop app. Run `npm test` to check the project.
-
-## What you can do
-
-- **Operations** — Filter the globe and timeline by topic, place, source, and evidence. Open a report for the original link and collection history.
-- **Live Wall** — Monitor six default broadcasts, choose backups, and follow headlines by source date or first receipt.
-- **Kiosk** — Loop a Cyber, Geopolitical & Earth, or AI & Robotics desk on a second screen. Select a region, review currently listed reports, or pause to explore the map.
 
 ## Feed sources
 
