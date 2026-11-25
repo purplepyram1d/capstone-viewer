@@ -1,10 +1,17 @@
 <!doctype html>
-<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="/assets/theme.js"></script><link rel="icon" type="image/svg+xml" href="/assets/eye-of-providence-small.svg"><title>Feeds · Capstone Viewer</title><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/console.css"><link rel="stylesheet" href="/assets/navigation.css"><script defer src="/assets/navigation.js"></script><script defer src="/assets/desk-model.js"></script><script defer src="/assets/common.js"></script><script defer src="/assets/desks.js"></script><script defer src="/assets/feeds.js"></script><link rel="stylesheet" href="/assets/themes.css"></head>
+<html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="/assets/theme.js"></script><link rel="icon" type="image/svg+xml" href="/assets/eye-of-providence-small.svg"><title>Feeds · Capstone Viewer</title><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/console.css"><link rel="stylesheet" href="/assets/navigation.css"><script defer src="/assets/navigation.js"></script><script defer src="/assets/desk-model.js"></script><script defer src="/assets/common.js"></script><script defer src="/assets/desks.js"></script><script defer src="/assets/feeds.js"></script><script defer src="/assets/accounts.js"></script><link rel="stylesheet" href="/assets/themes.css"></head>
 <body class="console">
 <header class="topbar"><a class="console-brand" href="/ops"><span class="brand-icon" aria-hidden="true">◭</span><span>CAPSTONE <b>VIEWER</b></span></a><nav aria-label="Main navigation"><a href="/ops">Operations</a><a href="/wall" target="_blank" rel="noopener">Live wall ↗</a><a href="/feeds" aria-current="page">Feeds</a><a href="/sources">Sources</a></nav><div class="top-actions"><span id="zulu" class="mono"></span><button id="fullscreen">⛶ <span>Fullscreen</span></button></div></header>
 <main class="feeds-shell">
-<section class="intro"><div><p class="eyebrow">BUILD YOUR SIGNAL NETWORK</p><h1>Your feeds.</h1><p class="subtle">Bring Telegram channels and Bluesky, Mastodon and X accounts into your event timeline.</p></div><a href="/ops" class="feed-return">View timeline ↗</a></section>
+<section class="intro"><div><h1>Feeds &amp; connections</h1><p class="subtle">Check collection health, follow sources, and manage API connections.</p></div><a href="/timeline" class="feed-return">Open timeline ↗</a></section>
+<nav class="section-links" aria-label="Feed sections"><a href="#source-inventory-title">Built-in collectors</a><a href="#tracked-feeds">Tracked feeds</a><a href="#feed-form-title">Add a feed</a><a href="#personal-accounts" id="personal-accounts-jump">Personal accounts</a><a href="#feed-connections">API connections</a><a href="#local-backups">Local backups</a></nav>
+<div class="feed-inventory-tools"><label>Search sources<input id="feed-search" type="search" placeholder="Source, group, or evidence type" maxlength="120" autocomplete="off"></label><label>Source group<select id="feed-group"><option value="">All groups</option></select></label><label>Show<select id="feed-visibility"><option value="all">All sources</option><option value="attention">Needs attention</option><option value="ready">Collecting normally</option><option value="waiting">Awaiting first poll</option><option value="paused">Paused</option><option value="needs-key">Needs connection</option></select></label><button type="button" id="reload-feeds">Refresh status</button></div><p id="feed-inventory-summary" class="subtle">Loading source status…</p><p id="feed-refresh-status" class="subtle" role="status"></p>
+<section class="panel source-inventory" aria-labelledby="source-inventory-title"><div class="panel-heading"><div><h2 id="source-inventory-title">Built-in collectors</h2><p class="subtle">See which sources cover each desk and when they last collected successfully.</p></div></div><p id="builtin-action-status" class="subtle feed-action-status" role="status"></p><div id="built-in-feeds" class="source-inventory-list">Loading collectors…</div></section>
 <div class="feeds-layout">
+<section class="panel" id="tracked-feeds"><div class="panel-heading"><h2>Tracked feeds <span id="social-count" class="count">0</span></h2></div><div id="social-feeds"><div class="empty-state">Loading your feeds…
+</div></div>
+<p class="feed-list-note subtle">Pausing stops future polls. Removing a feed keeps already collected posts in the 30-day timeline. Social posts remain unverified and are not automatically placed on the map.</p></section>
+<div class="feed-right" id="feed-tracked-column">
 <section class="panel feed-add"><div class="panel-heading"><div><p class="eyebrow">FOLLOW A SOURCE</p><h2 id="feed-form-title">Add a feed</h2></div></div>
 <form id="feed-form">
 <label>Platform<select id="feed-platform"><option value="telegram">Telegram public channel</option><option value="x">X account or public List</option><option value="bluesky">Bluesky account</option><option value="mastodon">Mastodon account</option></select></label>
@@ -17,11 +24,90 @@
 <label class="feed-check"><input type="checkbox" id="feed-claims"><span>This source relays attack claims: place posts that open with a country flag on that country, labelled as claims</span></label>
 <div class="dialog-actions"><button type="button" id="cancel-edit" hidden>Cancel edit</button><button type="submit" class="primary" id="save-feed">Add feed</button></div><p id="feed-form-status" role="status" class="subtle"></p>
 </form></section>
-<div class="feed-right">
-<section class="panel x-connection"><div class="panel-heading"><div><p class="eyebrow">X API CONNECTION</p><h2>Connect X <span id="x-state" class="count">Checking</span></h2></div></div><div class="connection-content"><p class="subtle">X accounts and Lists use your X developer bearer token. API reads can incur charges. Each feed has its own polling interval and post cap; X feeds start paused.</p><p class="subtle"><a href="https://developer.x.com/" target="_blank" rel="noopener noreferrer">X Developer Console ↗</a> · <a href="https://docs.x.com/x-api/getting-started/pricing" target="_blank" rel="noopener noreferrer">API pricing ↗</a></p><form id="x-form"><label>Bearer token<input type="password" id="x-token" placeholder="Paste your X API bearer token" autocomplete="off" spellcheck="false" maxlength="4096" required></label><div class="x-actions"><button type="submit" id="save-token">Save connection</button><button type="button" id="disconnect-x">Disconnect</button></div></form><p id="credential-storage" class="subtle"></p><p id="x-message" role="status" class="subtle"></p></div></section>
+
+<details class="panel feed-connections" id="personal-accounts"><summary>Personal accounts</summary><div class="feed-connection-list">
+  <section class="panel x-connection" aria-labelledby="x-account-title">
+    <div class="panel-heading"><h2 id="x-account-title">Link your X account</h2></div>
+    <div class="connection-content">
+      <p id="x-account-status" class="subtle" role="status">Checking connection…</p>
+      <div id="x-account-ready" class="x-actions" hidden><button type="button" id="x-add-following">Add Following feed</button><button type="button" id="x-unlink-account">Disconnect X</button></div>
+      <form id="x-account-form">
+        <details class="account-setup"><summary>One-time X setup</summary>
+          <p>Create a read-only Native App in the X Developer Console and register this exact callback. Use its public Client ID below.</p>
+          <label>Callback URL<input type="text" id="x-account-callback" readonly></label>
+          <a href="https://developer.x.com/" target="_blank" rel="noopener noreferrer">Open X Developer Console ↗</a>
+        </details>
+        <label>Native App Client ID<input id="x-account-client" autocomplete="off" spellcheck="false" maxlength="150" required></label>
+        <div class="x-actions"><button type="submit" id="x-account-start">Connect X</button><a id="x-account-authorize" target="_blank" rel="noopener noreferrer" hidden>Continue on X ↗</a><button type="button" id="x-account-cancel" hidden>Cancel sign-in</button></div>
+      </form>
+      <p class="subtle">X API reads may use developer credits. A Following feed starts paused and retains only posts from public authors.</p>
+      <p id="x-account-message" class="subtle" role="status"></p>
+    </div>
+  </section>
+  <section class="panel x-connection" aria-labelledby="telegram-account-title">
+    <div class="panel-heading"><h2 id="telegram-account-title">Link your Telegram account</h2></div>
+    <div class="connection-content">
+      <p id="telegram-account-status" class="subtle" role="status">Checking connection…</p>
+      <form id="telegram-account-form">
+        <details class="account-setup"><summary>One-time Telegram setup</summary>
+          <p>Open Telegram’s API development tools and create an app to get its API ID and hash.</p>
+          <a href="https://my.telegram.org/" target="_blank" rel="noopener noreferrer">Open Telegram API development tools ↗</a>
+        </details>
+        <div class="feed-form-row"><label>API ID<input id="telegram-account-id" inputmode="numeric" autocomplete="off" maxlength="10" required></label><label>API hash<input id="telegram-account-hash" type="password" autocomplete="off" spellcheck="false" maxlength="32" required></label></div>
+        <div class="x-actions"><button type="submit" id="telegram-account-start">Get Telegram QR code</button></div>
+      </form>
+      <div id="telegram-account-qr" class="account-qr" hidden><img alt="Telegram sign-in QR code" width="246" height="246"><p>On your phone, open Telegram → Settings → Devices → Link Desktop Device. Scan and approve this code.</p></div>
+      <form id="telegram-password-form" hidden><label>Telegram two-step verification password<input type="password" id="telegram-account-password" autocomplete="off" maxlength="512" required></label><button type="submit">Continue</button></form>
+      <div class="x-actions" id="telegram-account-waiting" hidden><button type="button" id="telegram-cancel-account">Cancel sign-in</button></div>
+      <div class="x-actions" id="telegram-account-ready" hidden><button type="button" id="telegram-load-channels">Find my public channels</button><button type="button" id="telegram-unlink-account">Disconnect Telegram</button></div>
+      <form id="telegram-import-form" hidden>
+        <p id="telegram-channel-summary" class="subtle"></p>
+        <label>Search public channels<input id="telegram-channel-search" type="search" autocomplete="off" spellcheck="false"></label>
+        <p id="telegram-selection-summary" class="subtle" role="status"></p>
+        <div id="telegram-channel-list" tabindex="0" role="region" aria-label="Public Telegram channels"></div>
+        <div class="x-actions"><label>Desk<select id="telegram-import-category"><option value="cyber">Cyber</option><option value="geo">Geopolitical &amp; Earth</option><option value="ai">AI &amp; Robotics</option></select></label><button id="telegram-import-selected" type="submit" disabled>Add selected channels</button></div>
+      </form>
+      <p class="subtle">Choose which public channels to track. Capstone keeps their public posts and leaves private conversations out of the feed.</p>
+      <p id="telegram-account-message" class="subtle" role="status"></p>
+    </div>
+  </section>
+</div></details>
+<details class="panel feed-connections" id="feed-connections"><summary>API connections</summary><div class="feed-connection-list">
+<section class="panel x-connection"><div class="panel-heading"><div><p class="eyebrow">X API CONNECTION</p><h2>X developer token <span id="x-state" class="count">Checking</span></h2></div></div><div class="connection-content"><p class="subtle">X accounts and Lists use your X developer bearer token. API reads can incur charges. Each feed has its own polling interval and post cap; X feeds start paused.</p><p class="subtle"><a href="https://developer.x.com/" target="_blank" rel="noopener noreferrer">X Developer Console ↗</a> · <a href="https://docs.x.com/x-api/getting-started/pricing" target="_blank" rel="noopener noreferrer">API pricing ↗</a></p><form id="x-form"><label>Bearer token<input type="password" id="x-token" placeholder="Paste your X API bearer token" autocomplete="off" spellcheck="false" maxlength="4096" required></label><div class="x-actions"><button type="submit" id="save-token">Save connection</button><button type="button" id="disconnect-x">Disconnect</button></div></form><p id="credential-storage" class="subtle"></p><p id="x-message" role="status" class="subtle"></p></div></section>
 <section class="panel x-connection"><div class="panel-heading"><div><p class="eyebrow">INTERNET HEALTH</p><h2>Connect Cloudflare Radar <span id="radar-state" class="count">Checking</span></h2></div></div><div class="connection-content"><p class="subtle">Adds Cloudflare's outage annotations and high-confidence BGP hijack detections. IODA outages and the RIPE RIS routing pulse need no token and collect already. A Radar API token is free with a Cloudflare account; the Radar guide shows the permission to grant.</p><p class="subtle"><a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" rel="noopener noreferrer">Cloudflare API tokens ↗</a> · <a href="https://developers.cloudflare.com/radar/get-started/first-request/" target="_blank" rel="noopener noreferrer">Radar API guide ↗</a></p><form id="radar-form"><label>API token<input type="password" id="radar-token" placeholder="Paste your Cloudflare API token" autocomplete="off" spellcheck="false" maxlength="4096" required></label><div class="x-actions"><button type="submit" id="save-radar">Save connection</button><button type="button" id="disconnect-radar">Disconnect</button></div></form><p id="radar-storage" class="subtle"></p><p id="radar-message" role="status" class="subtle"></p></div></section>
 <section class="panel x-connection"><div class="panel-heading"><div><p class="eyebrow">MALWARE INFRASTRUCTURE</p><h2>Connect abuse.ch <span id="abusech-state" class="count">Checking</span></h2></div></div><div class="connection-content"><p class="subtle">Adds daily ThreatFox and URLhaus rollups: how many new indicators and malware URLs each family picked up. Individual indicators are never copied into this app. abuse.ch retired its keyless exports; a free Auth-Key from their authentication portal unlocks both.</p><p class="subtle"><a href="https://auth.abuse.ch/" target="_blank" rel="noopener noreferrer">abuse.ch Authentication Portal ↗</a> · <a href="https://threatfox.abuse.ch/api/" target="_blank" rel="noopener noreferrer">ThreatFox API ↗</a></p><form id="abusech-form"><label>Auth-Key<input type="password" id="abusech-token" placeholder="Paste your abuse.ch Auth-Key" autocomplete="off" spellcheck="false" maxlength="4096" required></label><div class="x-actions"><button type="submit" id="save-abusech">Save connection</button><button type="button" id="disconnect-abusech">Disconnect</button></div></form><p id="abusech-storage" class="subtle"></p><p id="abusech-message" role="status" class="subtle"></p></div></section>
-<section class="panel"><div class="panel-heading"><div><p class="eyebrow">YOUR WATCHLIST</p><h2>Tracked feeds <span id="social-count" class="count">0</span></h2></div><button id="reload-feeds">Refresh status</button></div><div id="social-feeds"><div class="empty-state">Loading your feeds…</div></div><p class="feed-list-note subtle">Pausing stops future polls. Removing a feed keeps already collected posts in the 30-day timeline. Social posts remain unverified and are not automatically placed on the map.</p></section>
+</div></details>
+
 </div></div>
+<details class="panel feed-connections local-backup-panel" id="local-backups">
+  <summary>Local backups</summary>
+  <div class="connection-content">
+    <p class="subtle">Capstone keeps seven daily database backups. Create an extra copy before moving the app or archiving saved evidence. Backups include reports, private notes, watchlists, and feed choices.</p>
+    <dl id="backup-summary" class="backup-summary" hidden>
+      <div><dt>Latest daily backup</dt><dd id="backup-daily"></dd></div>
+      <div><dt>Latest manual backup</dt><dd id="backup-manual"></dd></div>
+    </dl>
+    <label for="backup-folder" id="backup-folder-label" hidden>Backup folder<input id="backup-folder" type="text" readonly></label>
+    <div class="backup-actions">
+      <button id="backup-create" type="button">Create backup now</button>
+      <button id="backup-copy-folder" type="button" disabled>Copy folder path</button>
+    </div>
+    <p id="backup-feedback" class="subtle" role="status"></p>
+  </div>
+</details>
 <footer class="console-footer"><span>CAPSTONE VIEWER / YOUR SIGNAL NETWORK</span><span>Public post text and metadata only. No media or attachments downloaded.</span></footer>
-</main></body></html>
+</main>
+<dialog id="poll-history" aria-labelledby="poll-history-title">
+  <div class="dialog-heading"><h2 id="poll-history-title">Poll history</h2><button id="poll-history-close" type="button" aria-label="Close poll history">✕</button></div>
+  <div class="poll-profile">
+    <p id="poll-profile-description"></p>
+    <div class="poll-profile-meta"><span id="poll-profile-evidence"></span><span id="poll-profile-interval"></span><span id="poll-profile-mirror" hidden>Last collected via official mirror</span></div>
+    <a id="poll-profile-link" target="_blank" rel="noopener noreferrer" hidden>Open source website ↗</a>
+    <a id="poll-watch-feed" href="/watch#rule-title">Set up a watchlist for this feed ↗</a>
+  </div>
+  <div class="poll-history-controls"><label>Period<select id="poll-hours"><option value="24">Last 24 hours</option><option value="168">Last 7 days</option></select></label><button type="button" id="poll-reload">Refresh</button></div>
+  <p id="poll-history-status" class="subtle" role="status"></p>
+  <div id="poll-history-table" class="poll-history-table" hidden>
+    <table><caption>Latest recorded polls</caption><thead><tr><th scope="col">Completed (UTC)</th><th scope="col">Result</th><th scope="col">Duration</th><th scope="col">Reports returned</th><th scope="col">Changes or error</th></tr></thead><tbody id="poll-history-rows"></tbody></table>
+  </div>
+</dialog></body></html>

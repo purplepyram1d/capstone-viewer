@@ -5,6 +5,8 @@
  {"name":"DW News","input":"@dwnews"},
  {"name":"ABC News · US","input":"@ABCNews"},
  {"name":"NBC News · US","input":"@NBCNews"},
+ {"name":"CBS News 24/7","input":"@CBSNews"},
+ {"name":"LiveNOW from FOX","input":"@livenowfox"},
  {"name":"CNA · Asia","input":"@channelnewsasia"},
  {"name":"Euronews · Europe","input":"@euronews"},
  {"name":"NHK WORLD-JAPAN","input":"@NHKWORLDJAPAN"}

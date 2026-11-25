@@ -1,5 +1,5 @@
 const base=process.env.CAPSTONE_URL||'http://127.0.0.1:8080';
-for(const route of ['/ops','/wall','/sources','/sources/','/assets/world.json','/assets/vendor/maplibre-gl.js','/runtime/events.sqlite','/server.mjs']){
+for(const route of ['/ops','/wall','/sources','/sources/','/assets/world.json','/assets/vendor/maplibre-gl.mjs','/assets/vendor/maplibre-gl-worker.mjs','/runtime/events.sqlite','/server.mjs']){
   const r=await fetch(base+route,{signal:AbortSignal.timeout(8000)});console.log(route,r.status);await r.body?.cancel();
 }
 const data=await(await fetch(base+'/api/events')).json();

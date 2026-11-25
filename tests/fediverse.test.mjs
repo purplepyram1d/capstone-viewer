@@ -29,7 +29,7 @@ test('Mastodon strips HTML, keeps content warnings visible, and skips boosts',()
 test('Mastodon collection refuses private DNS answers and uses cursors after the first poll',async()=>{
  const feed=feedConfig({platform:'mastodon',input:'@briankrebs@infosec.exchange'}),urls=[];
  await assert.rejects(collectSocial(feed,{},'',async()=>{throw new Error('must not fetch');},async()=>[{address:'10.1.2.3',family:4}]),/private or local/);
- const request=async url=>{urls.push(url);return {ok:true,text:async()=>url.includes('lookup')?JSON.stringify({id:'109'}):JSON.stringify([{id:'200',url:'https://infosec.exchange/@briankrebs/200',created_at:'2026-10-23T09:00:00Z',content:'<p>Hi</p>'}])};};
+ const request=async url=>{urls.push(url);return {ok:true,text:async()=>url.includes('lookup')?JSON.stringify({id:'109'}):JSON.stringify([{id:'200',url:'https://infosec.exchange/@briankrebs/200',created_at:new Date().toISOString(),content:'<p>Hi</p>'}])};};
  const first=await collectSocial(feed,{},'',request,async()=>[{address:'93.184.216.34',family:4}]);
  assert.deepEqual(first.runtime,{accountId:'109',sinceId:'200'});assert.equal(first.events.length,1);
  urls.length=0;await collectSocial(feed,first.runtime,'',request,async()=>[{address:'93.184.216.34',family:4}]);

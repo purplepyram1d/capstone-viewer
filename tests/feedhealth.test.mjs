@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
-import { feedHealth, tileOf, withGaps } from '../lib/feedhealth.mjs';
+import { feedHealth, pollCoverageState, tileOf, withGaps } from '../lib/feedhealth.mjs';
 import { createNotifier } from '../lib/notifier.mjs';
 const now=Date.parse('2026-10-23T18:00:00Z'),ago=m=>new Date(now-m*60000).toISOString();
 
@@ -20,9 +20,36 @@ test('a feed is failing after an hour of errors, stalled after an hour quiet, an
  assert.deepEqual(p.map(x=>`${x.id}:${x.kind}:${x.tile}`),['ioda:failing:internet','bbc:stalled:conflict','social-3:failing:cyber','ris-pulse:failing:internet']);
  assert.equal(feedHealth(feeds.slice(5,6),{now:now+40*60000}).length,1,'a 60-minute feed stalls only after three intervals');
  assert.equal(feedHealth([{id:'cisa',state:'ok',lastSuccess:ago(10)}],{now,pulse:{lastMessage:null}}).length,0,'a pulse that never connected yet is not reported');
- assert.equal(tileOf({id:'x',platform:'telegram',category:'cyber'}),'social');assert.equal(tileOf({id:'usgs'}),null);
+ assert.equal(tileOf({id:'x',platform:'telegram',category:'cyber'}),'social');assert.equal(tileOf({id:'usgs'}),'earth');assert.equal(tileOf({id:'meteo-fr'}),'earth');
  const tiles=withGaps([{id:'internet'},{id:'cyber'},{id:'social'}],p);
  assert.deepEqual(tiles.map(t=>t.gaps),[['IODA','RIPE RIS routing pulse'],['Hackmanac'],[]]);
+});
+
+test('per-source pauses are visible in coverage and do not count as collection errors', () => {
+  const feeds = [
+    {id:'jvn',name:'Japan Vulnerability Notes',enabled:false,state:'paused'},
+    {id:'kev',name:'CISA KEV',state:'ok',lastSuccess:ago(3)}
+  ];
+  const [tile] = withGaps([{id:'cyber'}],feedHealth(feeds,{now}),feeds,{now});
+  assert.deepEqual(tile.coverage,{label:'1/1 inputs current',current:1,expected:1,missing:[],paused:['Japan Vulnerability Notes']});
+  assert.deepEqual(tile.gaps,[]);
+});
+
+test('coverage distinguishes recent empty polls, overdue inputs, failures and pauses', () => {
+  const good = {state:'ok',intervalMinutes:15,lastSuccess:ago(10),newestReport:null};
+  assert.equal(pollCoverageState(good,{now}),'current');
+  assert.equal(pollCoverageState({...good,lastSuccess:ago(46),polling:true},{now}),'overdue');
+  assert.equal(pollCoverageState({...good,state:'error'},{now}),'error');
+  assert.equal(pollCoverageState({state:'waiting',polling:true},{now}),'collecting');
+  assert.equal(pollCoverageState({state:'waiting'},{now}),'waiting');
+  assert.equal(pollCoverageState({...good,enabled:false},{now}),'paused');
+  assert.equal(pollCoverageState(good,{enabled:false,now}),'paused');
+});
+
+test('built-in collectors use their configured polling cadence when checking for stalls', () => {
+  const scheduled = { id: 'kev', name: 'CISA KEV', intervalMinutes: 90, state: 'ok' };
+  assert.deepEqual(feedHealth([{ ...scheduled, lastSuccess: ago(75) }], { now }), []);
+  assert.equal(feedHealth([{ ...scheduled, lastSuccess: ago(271) }], { now })[0].kind, 'stalled');
 });
 
 test('feed failures notify once per outage, batch together, and respect the setting',()=>{

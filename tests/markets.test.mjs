@@ -21,7 +21,7 @@ test('CoinGecko prices carry the 24-hour change; missing coins are skipped', () 
 function fakeRequest(state) {
   return async url => {
     state.calls++;
-    if (url.includes('coingecko')) return state.coinsDown ? { ok: false, status: 429 } : { ok: true, json: async () => gecko };
+    if (url.includes('coingecko')) return state.coinsDown ? { ok: false, status: 429 } : { ok: true, json: async () => state.quotePayload || gecko };
     const symbol = decodeURIComponent(url.split('/chart/')[1].split('?')[0]);
     if (state.down?.includes(symbol)) return { ok: false, status: 500 };
     return { ok: true, json: async () => yahoo(state.price, 100) };
@@ -40,6 +40,44 @@ test('the board is cached for 15 minutes and keeps last good values when a sourc
   const dow = third.items.find(i => i.id === '^DJI'); assert.equal(dow.price, 110); assert.equal(dow.stale, true);
   assert.equal(third.items.find(i => i.id === 'bitcoin').stale, true);
   assert.equal(third.errors.length, 2);
+});
+
+test('an index outage does not defer the crypto request or duplicate pending refreshes', async () => {
+  let cryptoStarted = false;
+  let releaseIndex;
+  const slowIndex = new Promise(resolve=>{ releaseIndex = resolve; });
+  const request = async url=>{
+    if (url.includes('coingecko')) {
+      cryptoStarted = true;
+      return Response.json(gecko);
+    }
+    if (url.includes('GSPC')) return slowIndex;
+    return Response.json(yahoo(110,100));
+  };
+  const markets = createMarkets({request,clock:()=>now});
+  const first = markets.get();
+  const second = markets.get();
+  assert.equal(cryptoStarted,true);
+  releaseIndex(new Response('',{status:503}));
+  const [a,b] = await Promise.all([first,second]);
+  assert.equal(a,b);
+  assert.equal(a.items.length,INDICES.length+2);
+  assert.match(a.errors[0],/S&P 500/);
+});
+
+test('a partial crypto reply marks the previous quote and keeps its original timestamp', async () => {
+  let clock = now;
+  const state = {calls:0,price:110};
+  const markets = createMarkets({request:fakeRequest(state),clock:()=>clock});
+  const first = await markets.get();
+  clock += 16*60_000;
+  state.quotePayload = {...gecko,solana:undefined,ethereum:{...gecko.ethereum,last_updated_at:8.64e14}};
+  const second = await markets.get();
+  const quote = second.items.find(item=>item.id==='solana');
+  assert.equal(quote.asOf,first.items.find(item=>item.id==='solana').asOf);
+  assert.equal(quote.stale,true);
+  assert.match(second.errors[0],/Solana/);
+  assert.equal(second.items.find(item=>item.id==='ethereum').asOf,null);
 });
 
 test('a round that gets nothing retries after two minutes; disabled boards never fetch', async () => {

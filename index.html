@@ -3,37 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><script src="/assets/theme.js"></script><link rel="icon" type="image/svg+xml" href="/assets/eye-of-providence-small.svg">
-<title>Capstone Viewer</title>
-<meta name="description" content="Capstone Viewer is a cyber-first OSINT viewer for following current events: live cameras, global monitors, air and sea tracking, disasters, internet health and more.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Sources · Capstone Viewer</title>
+<meta name="description" content="Browse public cybersecurity, world news, internet health, and disaster monitoring resources in Capstone Viewer.">
 <link rel="stylesheet" href="assets/styles.css">
 <script defer src="/assets/navigation.js"></script><link rel="stylesheet" href="/assets/navigation.css"><link rel="stylesheet" href="/assets/themes.css"></head>
-<body>
+<body class="sources-page">
 <div class="wrap">
   <nav aria-label="Main navigation"><a href="/ops">Operations</a> · <a href="/wall" target="_blank" rel="noopener">Live wall ↗</a> · <a href="/feeds">Feeds</a> · <a href="/watch">Watchlists</a> · <a href="/timeline">Timeline</a> · <a href="/musk">Elon tracker</a> · <strong>Sources</strong></nav>
   <header class="mast">
     <div>
       <div class="brand">
         <span class="mark" role="img" aria-label="Capstone Viewer: the Eye of Providence"></span>
-        <div><h1>Capstone <span>Viewer</span></h1></div>
+        <div><h1>Source <span>directory</span></h1></div>
       </div>
-      <p>Open-source windows on what's happening right now. Cyber first: ransomware claims, exploited CVEs, live IOCs and breaches. Then the physical world: cameras, traffic, weather and conflict.</p>
+      <p>Browse public reference links by topic. Manage automated collection on the <a href="/feeds">Feeds</a> page.</p>
     </div>
-    <div class="utc"><span class="lamp"></span>Zulu time<strong id="utc">--:--:--</strong><span id="utcdate"></span><select id="theme-select" hidden></select></div>
+    <div class="source-header-tools"><div class="utc"><span class="lamp"></span>UTC<strong id="utc">--:--:--</strong><span id="utcdate"></span></div><div class="top-actions"><select id="theme-select" hidden></select></div></div>
   </header>
 
-  <section class="clocks" id="clocks" aria-label="City clocks"></section>
-  <p class="rail-note">Check the bar before you open a camera: an amber bar means it's daylight there and the streets are busy.</p>
-
+  <main id="source-main">
   <div class="controls">
     <label class="search" for="q">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Search sources, e.g. beach, conflict, GitHub, DDoS" autocomplete="off">
+      <input id="q" type="search" aria-label="Search source names, desks, and tags" placeholder="Search names, desks, or tags" autocomplete="off">
     </label>
+    <label class="source-scope">Collection<select id="source-scope"><option value="">All links</option><option value="feeds">Built-in feeds</option><option value="references">Reference links</option></select></label>
+    <button type="button" id="source-clear" class="source-action">Clear filters</button>
+    <button type="button" id="source-copy" class="source-action">Copy view link</button>
     <div class="chips" id="chips" role="group" aria-label="Filter by desk"></div>
   </div>
+
+  <div class="sources-summary"><p id="source-count" aria-live="polite"></p><span id="source-copy-status" role="status"></span></div>
 
   <details class="add" id="addbox">
     <summary>Add a source</summary>
@@ -49,9 +49,15 @@
     </form>
   </details>
 
-  <main id="desks"></main>
+  <div id="desks"></div>
+  </main>
 
-  <footer><span id="sync" role="status"></span> Links open in a new tab. Sources last checked October 2026.</footer>
+  <details class="add source-clockbox" id="source-clockbox">
+    <summary>World clocks</summary>
+    <section class="clocks" id="clocks" aria-label="City clocks"></section>
+  </details>
+
+  <footer><span id="sync" role="status">Stars and added sources are saved on this device.</span> Links open in a new tab.</footer>
 </div>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>

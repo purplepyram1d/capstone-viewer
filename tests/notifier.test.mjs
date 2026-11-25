@@ -25,7 +25,7 @@ test('the first check is a baseline; only later Severe escalations notify, once 
  n.check({status:[tile('internet','red')],watch:{alerts:[alert('old')]}});assert.equal(sent.length,0,'startup never replays');
  n.check({status:[tile('internet','green'),tile('cyber','amber')]});
  n.check({status:[tile('internet','red','3 countries with major outages'),tile('cyber','amber')]});
- assert.equal(sent.length,1);assert.equal(sent[0].title,'Internet: Severe');assert.equal(sent[0].body,'3 countries with major outages');assert.equal(sent[0].path,'/ops');
+ assert.equal(sent.length,1);assert.equal(sent[0].title,'Internet: High signals');assert.equal(sent[0].body,'3 countries with major outages');assert.equal(sent[0].path,'/ops');
  n.check({status:[tile('internet','green')]});n.check({status:[tile('internet','red')]});assert.equal(sent.length,1,'flapping within 30 minutes stays quiet');
  advance(31*60000);n.check({status:[tile('internet','green')]});n.check({status:[tile('internet','red')]});assert.equal(sent.length,2);
  n.check({status:[tile('internet','red'),tile('cyber','amber')]});assert.equal(sent.length,2,'Elevated is off by default');
@@ -49,5 +49,5 @@ test('settings validate, persist, switch kinds off, and respect quiet hours acro
  quiet.n.check({status:[tile('internet','green')]});quiet.n.check({status:[tile('internet','red')]});assert.equal(quiet.sent.length,0,'quiet hours suppress');
  const off=setup();off.n.update({watch:false,elevated:true});assert.equal(off.n.settings().elevated,true);
  off.n.check({status:[tile('cyber','green')],watch:{alerts:[]}});off.n.check({status:[tile('cyber','amber')],watch:{alerts:[alert('z')]}});
- assert.deepEqual(off.sent.map(m=>m.title),['Cyber: Elevated'],'watch matches off, Elevated on');
+ assert.deepEqual(off.sent.map(m=>m.title),['Cyber: Elevated signals'],'watch matches off, Elevated on');
 });

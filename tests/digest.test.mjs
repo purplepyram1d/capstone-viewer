@@ -31,6 +31,21 @@ test('the digest reports changes, peaks, new and cleared hot spots, outages and 
  assert.equal(d.partial,false);assert.equal(d.quiet,false);
 });
 
+test('partial working snapshots cannot imply outages ended or hot-spot activity fell',()=>{
+ const then={ts:at(5),levels:{internet:'red'},hotspots:[{id:'location',name:'Example',families:2}],outages:['IR'],epss:{}};
+ const available={levels:{internet:'green'},hotspots:[],outages:[],epss:{}};
+ const status=tiles(available.levels);
+ for (const [checkpoint,current] of [[then,{...available,report_limit_reached:true}],[{...then,report_limit_reached:true},available]]) {
+   const digest=buildDigest({since:at(5),then:checkpoint,current,status,now});
+   assert.equal(digest.report_limit_reached,true);
+   assert.equal(digest.tiles[0].changed,false);
+   assert.deepEqual(digest.outages.ended,[]);
+   assert.deepEqual(digest.hotspots.cleared,[]);
+   assert.equal(digest.quiet,false);
+ }
+ assert.equal(situation({reportWindow:{limited:true}},now).report_limit_reached,true);
+});
+
 test('missing history is partial and never called quiet; a watched calm stretch is quiet',()=>{
  const current={levels:{internet:'green'},hotspots:[],outages:[],epss:{}};
  const unwatched=buildDigest({since:at(3),then:null,current,status:tiles({internet:'green'}),events:[],now});

@@ -47,6 +47,9 @@ test('hot spots need two signal families or a volume spike, and ongoing outages 
  assert.equal(spots.some(s=>s.country==='US'),false);
  assert.equal(spots.some(s=>s.country==='CL'),false,'one claim plus one quake is background, not a hot spot');
  const japan=spots.find(s=>s.country==='JP');assert.ok(japan.spike,'six reports in a day against an empty week is a spike');assert.equal(japan.families.length,1);
+ const limited=computeHotspots(reports,{resolve,countries,now,allowVolumeSpikes:false});
+ assert.equal(limited.some(spot=>spot.country==='JP'),false);
+ assert.ok(limited.some(spot=>spot.country==='IR'));
  assert.equal(spots[0].country,'IR','multi-family spots rank first');
  assert.match(iran.basis[0],/2 kinds of signal/);
 });
@@ -69,7 +72,14 @@ test('ransomware, breach and confirmed-incident claims count as one kind; hackti
  const lith=spots.find(s=>s.country==='LT');assert.ok(lith,'hacktivist plus criminal claims are two kinds');assert.match(lith.basis[0],/2 kinds/);
 });
 
-test('machine-coded fighting joins a hot spot only when it escalates against 3+ earlier days',()=>{
+test('state connectivity measurements do not turn a separate U.S. news report into a country hot spot',()=>{
+ const country = {country:'US',lat:countries.US.lat,lon:countries.US.lon,place:'United States',place_basis:'country_centroid'};
+ const news = report('independent-news',{...country,kind:'news',category:'geo'});
+ const signal = report('state-ioda',{...country,kind:'outage',source:'IODA',outage_scope:'state',state_codes:['WA'],ongoing:true});
+ assert.equal(computeHotspots([news,signal],{resolve,countries,now}).some(spot=>spot.country==='US'),false);
+});
+
+test('conflict signals join a hot spot only when they escalate against 3+ earlier days',()=>{
  const ua={country:'UA',lat:countries.UA.lat,lon:countries.UA.lon,place:'Ukraine',place_basis:'country_centroid'};
  const g=(id,hoursAgo,outlets)=>report(id,{...ua,category:'geo',kind:'conflict',outlets,ts:hours(hoursAgo)});
  const news=report('ua-news',{...ua,title:'Strikes on Kyiv'});
@@ -78,5 +88,7 @@ test('machine-coded fighting joins a hot spot only when it escalates against 3+ 
  const surge=[g('d4',96,14),g('d3',72,15),g('d2',48,16),g('d1',24.5,15),g('today',1,40),news];
  const spot=computeHotspots(surge,{resolve,countries,now}).find(s=>s.country==='UA');
  assert.ok(spot,'40 outlets against an average of 15 is an escalation');assert.ok(spot.families.some(f=>f.id==='conflict'));
+ const gdelt=surge.map(report=>report.kind==='conflict'?{...report,source:'GDELT'}:report);
+ assert.ok(computeHotspots(gdelt,{resolve,countries,now}).every(spot=>!spot.families.some(f=>f.id==='conflict')));
  assert.equal(computeHotspots([g('today',1,40),news],{resolve,countries,now}).some(s=>s.country==='UA'),false,'no history yet, no escalation');
 });

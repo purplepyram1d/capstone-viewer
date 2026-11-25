@@ -1,31 +1,56 @@
 <!doctype html>
 <html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="/assets/theme.js"></script><link rel="icon" type="image/svg+xml" href="/assets/eye-of-providence-small.svg"><title>Kiosk · Capstone Viewer</title>
-<link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/vendor/maplibre-gl.css"><link rel="stylesheet" href="/assets/console.css">
-<script defer src="/assets/vendor/maplibre-gl.js"></script><script defer src="/assets/common.js"></script><script defer src="/assets/map-labels.js"></script><script defer src="/assets/kiosk.js"></script><link rel="stylesheet" href="/assets/themes.css"></head>
+<link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/vendor/maplibre-gl.css?v=6.19.0"><link rel="stylesheet" href="/assets/console.css">
+<script defer src="/assets/common.js"></script><script defer src="/assets/report-drawer.js"></script><script defer src="/assets/map-labels.js"></script><script defer src="/assets/event-types.js"></script><script defer src="/assets/status-details.js"></script><script defer src="/assets/headline-model.js"></script><script defer src="/assets/kiosk-regions.js"></script><script defer src="/assets/region-coverage.js"></script><script defer src="/assets/kiosk.js"></script><link rel="stylesheet" href="/assets/themes.css"></head>
 <body class="console kiosk" data-live="full">
 <div class="kiosk-shell">
-  <header class="kiosk-top"><div class="kiosk-brand"><span class="brand-icon" aria-hidden="true">◭</span><span>CAPSTONE <b>VIEWER</b></span></div><div id="kiosk-tiles" class="kiosk-tiles" aria-label="Status board"></div><div class="kiosk-clocks"><span id="zulu" class="mono"></span><span id="kiosk-local" class="mono"></span></div></header>
+  <header class="kiosk-top"><div class="kiosk-identity"><div class="kiosk-brand"><span class="brand-icon" aria-hidden="true">◭</span><span>CAPSTONE <b>VIEWER</b></span></div><div class="kiosk-scope-actions" id="kiosk-scope-actions"><label class="kiosk-desk-label">Desk <select id="kiosk-desk"><option value="all">All desks</option><option value="cyber">Cyber</option><option value="geo">Geopolitical &amp; Earth</option><option value="ai">AI &amp; Robotics</option></select></label><label class="kiosk-desk-label">Reports <select id="kiosk-report-mode"><option value="recent">Recent reports</option><option value="listed">Currently listed</option></select></label><button type="button" id="kiosk-region-open" aria-haspopup="dialog">All regions</button></div><small id="kiosk-evidence-mode" hidden>Official or measured</small><button id="kiosk-coverage-open" type="button" aria-haspopup="dialog" hidden>Source checks</button><small id="kiosk-scope-counts" hidden></small></div><div id="kiosk-tiles" class="kiosk-tiles" aria-label="Status board"></div><div class="kiosk-clocks"><span id="zulu" class="mono"></span><span id="kiosk-local" class="mono"></span><span id="kiosk-freshness" class="mono kiosk-freshness" role="status" hidden></span><button id="kiosk-gap-open" type="button" aria-haspopup="dialog" hidden>Collection gap</button></div></header>
+  <p id="kiosk-connection" class="kiosk-connection" role="status">Waiting for a live snapshot</p>
   <div id="kiosk-banner" class="kiosk-banner" role="alert" hidden></div>
   <main class="kiosk-stage">
     <div id="kiosk-map" aria-label="Rotating world map of hot spots and stories"></div><div id="kiosk-fallback" hidden></div>
     <aside id="kiosk-focus" class="kiosk-focus" aria-live="polite"><p class="eyebrow">WAITING FOR THE FIRST SNAPSHOT</p></aside>
+    <p id="kiosk-map-status" class="kiosk-map-status" role="status" hidden></p>
     <div id="kiosk-progress" class="kiosk-progress" aria-hidden="true"><i></i></div>
   </main>
-  <footer class="kiosk-ticker" aria-label="Latest headlines"><span class="kiosk-ticker-label">LATEST</span><div class="kiosk-ticker-window"><div id="kiosk-ticker-track" class="kiosk-ticker-track"></div></div></footer>
+  <footer class="kiosk-ticker" aria-label="Latest headlines"><span id="kiosk-ticker-label" class="kiosk-ticker-label">LATEST</span><div class="kiosk-ticker-window" role="region" aria-label="Kiosk headlines"><div id="kiosk-ticker-track" class="kiosk-ticker-track"></div></div><button id="kiosk-controls-toggle" type="button" aria-controls="kiosk-controls" aria-expanded="false">Controls</button><button id="kiosk-queue-open" type="button" aria-haspopup="dialog">Tour queue</button></footer>
 </div>
 <div id="kiosk-controls" class="kiosk-controls" hidden>
   <button id="kiosk-prev" aria-label="Previous focus">◀</button><button id="kiosk-pause">Pause tour</button><button id="kiosk-next" aria-label="Next focus">▶</button>
+  <button id="kiosk-explore" type="button" aria-pressed="false" disabled>Explore map</button>
   <button id="kiosk-sound">Sound off</button><button id="kiosk-settings-open">Settings</button><button id="fullscreen">⛶ <span>Fullscreen</span></button><a href="/ops">Operations</a>
-  <span class="kiosk-keys">Space pause · ← → step · M sound · F fullscreen · S settings</span>
+  <span class="kiosk-keys">Space pause · ← → step · M sound · F fullscreen · Q queue · S settings</span>
 </div>
+<dialog id="kiosk-status" aria-labelledby="kiosk-status-title">
+  <div class="dialog-heading"><h2 id="kiosk-status-title">Signal activity</h2><button type="button" id="kiosk-status-close" aria-label="Close signal activity">✕</button></div>
+  <div id="kiosk-status-body"></div>
+</dialog>
+<dialog id="kiosk-mapped" aria-labelledby="kiosk-mapped-title">
+  <div class="dialog-heading"><h2 id="kiosk-mapped-title">Reports at this point</h2><button type="button" id="kiosk-mapped-close" aria-label="Close mapped reports">✕</button></div>
+  <div id="kiosk-mapped-list" class="kiosk-queue-list"></div>
+</dialog>
+<dialog id="kiosk-queue" aria-labelledby="kiosk-queue-title">
+  <div class="dialog-heading"><h2 id="kiosk-queue-title">Tour queue</h2><button type="button" id="kiosk-queue-close" aria-label="Close tour queue">✕</button></div>
+  <p id="kiosk-queue-status" class="subtle" aria-live="polite"></p>
+  <div id="kiosk-queue-list" class="kiosk-queue-list"></div>
+</dialog>
 <dialog id="kiosk-settings"><form id="kiosk-settings-form"><div class="dialog-heading"><h2>Kiosk settings</h2><button type="button" id="kiosk-settings-close" aria-label="Close settings">✕</button></div>
   <p>Saved on this device for the kiosk window only.</p>
+  <button type="button" id="ks-copy-view">Copy current view link</button>
+  <small id="ks-link-status" role="status"></small>
+  <label id="ks-link-fallback" hidden>View link<input id="ks-link-value" readonly type="url"></label>
   <div class="feed-form-row"><label>Seconds per focus<input type="number" id="ks-dwell" min="8" max="180" required></label><label>Map<select id="ks-projection"><option value="globe">Globe</option><option value="mercator">Flat</option></select></label></div>
+  <label>Find a region<input id="ks-region-search" type="search" placeholder="Name or code, such as WA or BC" autocomplete="off" aria-controls="ks-region" disabled></label>
+  <label>Region<select id="ks-region" disabled><option value="">All regions</option></select></label>
+  <p id="ks-region-results" class="subtle" role="status" hidden></p><p id="ks-region-message" class="subtle" role="status" hidden></p>
+  <label>Recent report time<select id="ks-time-basis"><option value="source">Source date</option><option value="received">First received</option></select></label>
+  <label>Evidence<select id="ks-evidence"><option value="all">All reports</option><option value="primary">Official or measured</option></select></label>
+  <label class="feed-check"><input type="checkbox" id="ks-watch-only">Watchlist matches only</label>
   <label class="feed-check"><input type="checkbox" id="ks-sound">Alert tones</label>
-  <label class="feed-check"><input type="checkbox" id="ks-amber">Also chime when a tile turns Elevated (Severe always alarms)</label>
+  <label class="feed-check"><input type="checkbox" id="ks-amber">Also chime for elevated alerts based on outage measurements or CISA KEV</label>
   <label>Volume<input type="range" id="ks-volume" min="0" max="1" step="0.05"></label>
   <div class="feed-form-row"><label>Quiet hours start<input type="time" id="ks-quiet-start"></label><label>Quiet hours end<input type="time" id="ks-quiet-end"></label></div>
   <p class="subtle">During quiet hours the banner still shows; tones stay silent. Leave both blank for no quiet hours.</p>
-  <div class="dialog-actions"><button type="button" id="ks-test">Test Severe tone</button><button type="submit" class="primary">Save</button></div>
+  <div class="dialog-actions"><button type="button" id="ks-test">Test high-priority tone</button><button type="submit" class="primary">Save</button></div>
 </form></dialog>
 </body></html>

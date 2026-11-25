@@ -19,6 +19,11 @@ test('RSS and Atom formats accept alternate links and reject HTML responses',()=
  const rss=parseRSS('<rss><channel><item><title>Advisory</title><link>https://example.org/a</link><pubDate>Fri, 23 Oct 2026 10:00:00 GMT</pubDate><description><![CDATA[<p>Patch now</p>]]></description></item></channel></rss>');assert.equal(rss[0].title,'Advisory');assert.equal(rss[0].url,'https://example.org/a');
  const atom=parseRSS('<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>Update</title><link rel="self" href="https://example.org/feed"/><link rel="alternate" href="https://example.org/article"/><updated>2026-10-23T10:00:00Z</updated></entry></feed>');assert.equal(atom[0].url,'https://example.org/article');
  assert.throws(()=>parseRSS('<html>Access denied</html>'));assert.throws(()=>parseRSS('<rss><broken>'));
+ assert.throws(()=>parseRSS('<rss><not-a-channel/></rss>'));
+ assert.deepEqual(parseRSS('<rss><channel/></rss>'),[]);
+ const wrapped=parseRSS('<rss><channel><item><title>123</title><link>https://example.org/a?x=1&amp;y=2</link></item></channel></rss>');
+ assert.equal(wrapped[0].title,'123');
+ assert.equal(wrapped[0].url,'https://example.org/a?x=1&y=2');
 });
 test('KEV uses explicitly labelled vendor context, never fabricated incident geography',()=>{
  const data={vulnerabilities:[{cveID:'CVE-2026-12345',vendorProject:'TestVendor',vulnerabilityName:'A flaw',dateAdded:'2026-10-23',shortDescription:'Known exploitation',requiredAction:'Patch',knownRansomwareCampaignUse:'Known'}]};

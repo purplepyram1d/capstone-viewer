@@ -21,7 +21,7 @@
 [data-theme="parchment"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(90,60,20,.12)); background-attachment:fixed; }
 [data-theme="candle"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.35)); background-attachment:fixed; }
 [data-theme="rosegold"] body { background-image:radial-gradient(ellipse at center,transparent 60%,rgba(183,110,121,.08)); background-attachment:fixed; }
-[data-theme="rosegold"] .console h1, [data-theme="rosegold"] .console-brand b, [data-theme="rosegold"] .kiosk-brand b { background:linear-gradient(100deg,#9c5a63 0%,#b76e79 30%,#ecc7bd 50%,#b76e79 70%,#9c5a63 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+[data-theme="rosegold"] .console h1, [data-theme="rosegold"] .console-brand b, [data-theme="rosegold"] .kiosk-brand b { background:linear-gradient(100deg,#874a55 0%,#a05a65 30%,#aa6570 50%,#a05a65 70%,#874a55 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
 [data-theme="rosepine"] ::selection { background:#403d52; color:#e0def4; }
 [data-theme="rosedawn"] ::selection { background:#dfdad9; color:#575279; }
 [data-theme="rosegold"] ::selection { background:#ecc7bd; color:#4a2b31; }
@@ -44,6 +44,33 @@
 :root[data-theme="highcontrast"] { --paper:#0b0b0b; --panel:#1d1d1d; --rule:#c8c8c8; --ink:#fff; --muted:#dedede; --signal:#ffdf64; --signal-soft:#302900; --sun:#ffdf64; --live:#a9ffad; --night:#9fe6ff; color-scheme:dark; }
 [data-theme="highcontrast"] .console { --geo:#ffdf64; --ai:#9fe6ff; --water:#000; --land:#292929; --borders:#c8c8c8; --hot:#ff9caa; --night-shade:#000; --night-alpha:.3; }
 
+/* Sleek group (2026-11-18): modern minimal palettes. Neutral near-black (or near-white) surfaces, hairline rules and one
+   sharp accent. Event-type tones (--hot, --signal, --ai, --night, --geo, --live) stay distinct in each. */
+:root[data-theme="obsidian"] { --paper:#0e0f11; --panel:#16181c; --rule:#25282e; --ink:#e6e8eb; --muted:#8b9099; --signal:#4cc9f0; --signal-soft:#132a33; --sun:#fbbf24; --live:#34d399; --night:#818cf8; color-scheme:dark; }
+[data-theme="obsidian"] .console { --geo:#fbbf24; --ai:#c084fc; --water:#0a0b0d; --land:#1b1e23; --borders:#30353d; --hot:#ff5c7a; --night-shade:#000; --night-alpha:.45; }
+
+:root[data-theme="carbon"] { --paper:#000; --panel:#0c0c0c; --rule:#1f1f1f; --ink:#f2f2f2; --muted:#8a8a8a; --signal:#f5f5f5; --signal-soft:#1c1c1c; --sun:#fbbf24; --live:#4ade80; --night:#60a5fa; color-scheme:dark; }
+[data-theme="carbon"] .console { --geo:#fbbf24; --ai:#a78bfa; --water:#000; --land:#141414; --borders:#2b2b2b; --hot:#ff3b4e; --night-shade:#000; --night-alpha:.5; }
+
+:root[data-theme="neonnoir"] { --paper:#0b0a17; --panel:#13112a; --rule:#2a2450; --ink:#ece9ff; --muted:#9a93c9; --signal:#f72fff; --signal-soft:#2a1238; --sun:#ffd23f; --live:#00f0ff; --night:#3d8bff; color-scheme:dark; }
+[data-theme="neonnoir"] .console { --geo:#ffd23f; --ai:#b388ff; --water:#07061a; --land:#1a1638; --borders:#3a3170; --hot:#ff355e; --night-shade:#000; --night-alpha:.45; }
+
+:root[data-theme="slate"] { --paper:#101114; --panel:#17181c; --rule:#26282e; --ink:#f7f8f8; --muted:#8a8f98; --signal:#7c84f5; --signal-soft:#1f2140; --sun:#e2b340; --live:#4cc38a; --night:#4cb2e5; color-scheme:dark; }
+[data-theme="slate"] .console { --geo:#e2b340; --ai:#c58af9; --water:#0c0d10; --land:#1d1f24; --borders:#33363d; --hot:#f2555a; --night-shade:#000; --night-alpha:.45; }
+
+:root[data-theme="terminal"] { --paper:#050806; --panel:#0b120d; --rule:#1b2a1f; --ink:#c8f7d2; --muted:#6f9a7a; --signal:#39ff88; --signal-soft:#0f2a18; --sun:#ffcc66; --live:#39ff88; --night:#5ccfe6; color-scheme:dark; }
+[data-theme="terminal"] .console { --geo:#ffcc66; --ai:#c792ea; --water:#030504; --land:#0f1a12; --borders:#24382a; --hot:#ff5f56; --night-shade:#000; --night-alpha:.5; }
+
+:root[data-theme="arctic"] { --paper:#f6f7f9; --panel:#fff; --rule:#e2e5ea; --ink:#0f172a; --muted:#5b6475; --signal:#2563eb; --signal-soft:#e3ebfd; --sun:#b45309; --live:#047857; --night:#4f46e5; color-scheme:light; }
+[data-theme="arctic"] .console { --geo:#b45309; --ai:#9333ea; --water:#e9edf3; --land:#fff; --borders:#c3cad5; --hot:#dc2626; --night-shade:#0f172a; --night-alpha:.1; }
+
+/* Sleek finish: no paper textures, accent-tinted selection, and a faint accent hairline under the top bar. */
+:is([data-theme="obsidian"],[data-theme="carbon"],[data-theme="neonnoir"],[data-theme="slate"],[data-theme="terminal"],[data-theme="arctic"]) body { background-image:none; }
+:is([data-theme="obsidian"],[data-theme="carbon"],[data-theme="neonnoir"],[data-theme="slate"],[data-theme="terminal"],[data-theme="arctic"]) ::selection { background:color-mix(in srgb,var(--signal) 35%,transparent); color:var(--ink); }
+:is([data-theme="obsidian"],[data-theme="carbon"],[data-theme="neonnoir"],[data-theme="slate"],[data-theme="terminal"],[data-theme="arctic"]) .topbar { box-shadow:0 1px 0 color-mix(in srgb,var(--signal) 28%,transparent); }
+[data-theme="neonnoir"] .console h1, [data-theme="neonnoir"] .console-brand b, [data-theme="neonnoir"] .kiosk-brand b { text-shadow:0 0 18px color-mix(in srgb,var(--signal) 55%,transparent); }
+[data-theme="terminal"] .console h1 { text-shadow:0 0 10px color-mix(in srgb,var(--signal) 45%,transparent); }
+
 #theme-select {
   font: 12px var(--font-body);
   color: var(--ink);
@@ -60,3 +87,47 @@
 @media (max-width: 760px) {
   .top-actions { flex-wrap: wrap; justify-content: flex-end; }
 }
+
+/* Matrix uses green page chrome while retaining distinct operational signal colors. */
+:root[data-theme="matrix"] {
+  --paper:#020704;
+  --panel:#07130c;
+  --rule:#235b35;
+  --ink:#dcffe5;
+  --muted:#94bf9d;
+  --signal:#5cff88;
+  --signal-soft:#10361d;
+  --sun:#ffd36e;
+  --live:#83e6ac;
+  --night:#7bd5ff;
+  --font-body:var(--font-mono);
+  color-scheme:dark;
+}
+[data-theme="matrix"] .console {
+  --geo:#ffd36e;
+  --ai:#d6a7ff;
+  --water:#020805;
+  --land:#10271a;
+  --borders:#427c50;
+  --hot:#ff9292;
+  --night-shade:#000;
+  --night-alpha:.38;
+}
+[data-theme="matrix"] body { background-image:none; }
+[data-theme="matrix"] .topbar { box-shadow:0 1px 0 #5cff8840; }
+[data-theme="matrix"] .console-brand b,
+[data-theme="matrix"] .kiosk-brand b { text-shadow:0 0 12px #5cff8840; }
+[data-theme="matrix"] ::selection { background:#245b34; color:#fff; }
+
+/* Text variants preserve the palette accents used for markers and decoration. */
+:root[data-theme="parchment"] { --sun-text:#84601f; --geo-text:#895f1c; }
+:root[data-theme="rosepine"] { --night-text:#5a90a5; }
+:root[data-theme="rosedawn"] {
+  --muted-text:#6e6a86; --signal-text:#975366; --sun-text:#9a6217; --night-text:#79668e;
+  --geo-text:#97631b; --ai-text:#44757e; --hot-text:#a0586d;
+}
+:root[data-theme="rosegold"] {
+  --muted-text:#866569; --signal-text:#8d555d; --sun-text:#916438; --live-text:#567460;
+  --geo-text:#8a6544; --ai-text:#56726e;
+}
+:root[data-theme="arctic"] { --signal-text:#235edf; --hot-text:#d82525; }

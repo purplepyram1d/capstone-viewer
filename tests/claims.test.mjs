@@ -18,13 +18,13 @@ test('flag-led relay posts become country-placed claims with group and victim',(
  const egypt=parseClaim(`🚨Cyber Alert ‼️\n\n🇪🇬Egypt: ${bold('Telecom Egypt - We academy')}\n\nThe n0n hacker group claims to have breached Telecom Egypt's training academy.`,countries);assert.equal(egypt.victim,'Telecom Egypt - We academy');
 });
 
-test('confirmed incidents, hacktivist DDoS and structured fields are classified correctly',()=>{
+test('relayed incidents, hacktivist DDoS and structured fields are classified correctly',()=>{
  const confirmed=parseClaim(`🚨Cyber Alert ‼️\n\n🇯🇵Japan - ${bold('Capcom')}\n\nCapcom confirmed a cyberattack targeting its CAPCOM ID account system.`,countries);
- assert.equal(confirmed.kind,'incident');assert.equal(confirmed.title,'Confirmed incident: Capcom (Japan)');assert.match(confirmed.confidence,/Victim-confirmed/);assert.equal(family(confirmed),'incident');
+ assert.equal(confirmed.kind,'incident');assert.equal(confirmed.title,'Reported incident: Capcom (Japan)');assert.match(confirmed.confidence,/Unverified/);assert.equal(family(confirmed),'incident');
  const ddos=parseClaim(`🚨Cyber Alert ‼️\n\n🇱🇹Lithuania - ${bold('Vilnius Airport')}\n\nNoName057(16) claims DDoS attacks on the airport website.`,countries);
  assert.equal(ddos.claim_type,'hacktivist');assert.equal(ddos.score,60);assert.equal(family(ddos),'hacktivist');
  const structured=parseClaim(`🚨Cyber Alert ‼️\n\n🇪🇸Spain - ${bold('Toyota Canarias')}\n\nAttack reported.\nThreat actor: Qilin   Sector: Retail`,countries);assert.equal(structured.claim_group,'Qilin');
- assert.equal(classifyClaim('Railway disclosed a security incident').type,'confirmed');assert.equal(plain(bold('Haier')),'Haier');
+ assert.equal(classifyClaim('Railway disclosed a security incident').type,'incident');assert.equal(plain(bold('Haier')),'Haier');
 });
 
 test('posts without a leading country flag, or with an unknown one, stay ordinary posts',()=>{

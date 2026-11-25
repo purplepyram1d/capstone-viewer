@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeIODA, normalizeRadarOutages, normalizeRadarHijacks, createBgpPulse, iodaUrl } from '../lib/internet.mjs';
+import { normalizeIODA, normalizeIodaStates, normalizeRadarOutages, normalizeRadarHijacks, createBgpPulse, iodaUrl, iodaStateUrl } from '../lib/internet.mjs';
+import { buildStories } from '../lib/intelligence.mjs';
+import { computeStatus } from '../lib/status.mjs';
 const countries={IR:{lat:32.4,lon:53.7,name:'Iran'},LT:{lat:55.2,lon:23.9,name:'Lithuania'},UA:{lat:48.4,lon:31.2,name:'Ukraine'}};
 const now=Date.parse('2026-10-23T15:00:00Z'),until=Math.floor(now/1000);
 
@@ -20,6 +22,32 @@ test('IODA outage events become country-placed, flagged ongoing, measured-not-at
  assert.equal(normalizeIODA(data,countries,now)[0].id,events[0].id,'stable IDs across polls');
  assert.throws(()=>normalizeIODA({error:'x'},countries,now),/Invalid IODA/);
  assert.match(iodaUrl(now),/entityType=country&includeAlerts=false&format=ioda/);
+});
+
+test('IODA regional measurements select U.S. states and stay separate from country outages',()=>{
+ const params = new URL(iodaStateUrl(now)).searchParams;
+ assert.equal(params.get('relatedTo'),'country/US');
+ assert.equal(params.get('entityType'),'region');
+ const wa = {entity:{code:'4414',name:'Washington',type:'region',attrs:{country_code:'US'}},from:until-3600,until,datasource:'bgp',method:'median',score:28000};
+ const ny = {...wa,entity:{...wa.entity,name:'New York',code:'4426'}};
+ const abroad = {...wa,entity:{...wa.entity,attrs:{country_code:'CA'}}};
+ const brief = {...wa,from:until-100};
+ const unknown = {...wa,entity:{...wa.entity,name:'Unknown Region'}};
+ const fixture = {requestParameters:{until:String(until),relatedTo:'country/US'},data:[wa,ny,abroad,brief,unknown]};
+ const reports = normalizeIodaStates(fixture,now);
+ assert.deepEqual(reports.map(report=>report.state_codes[0]),['WA','NY']);
+ assert.equal(reports[0].outage_scope,'state');
+ assert.equal(reports[0].place_basis,'state_reference');
+ assert.equal(reports[0].ongoing,true);
+ assert.match(reports[0].url,/\/region\/4414\?from=/);
+ assert.match(reports[0].summary,/cause and local impact were not established/);
+ assert.throws(()=>normalizeIodaStates({...fixture,data:Array(100).fill(wa)},now),/coverage may be incomplete/);
+ const national = {...reports[0],id:'national-outage',title:'National signal',url:'https://example.org/national',place:'United States',
+   outage_scope:'country',state_codes:[]};
+ assert.equal(buildStories([...reports,national]).length,3);
+ const internet = computeStatus({reports,now}).find(tile=>tile.id==='internet');
+ assert.equal(internet.inputs.find(item=>item.label==='Countries with an ongoing outage').value,0);
+ assert.equal(internet.inputs.find(item=>item.label==='U.S. states with a current detection').value,2);
 });
 
 test('Cloudflare Radar outages and hijacks normalize from the documented schema',()=>{
@@ -52,4 +80,38 @@ test('BGP pulse needs a baseline, flags a 4x withdrawal surge once, and reconnec
  pulse.check();pulse.check();assert.equal(surges.length,1,'debounced');
  assert.equal(surges[0].lat,null);assert.match(surges[0].summary,/No location or attribution/);
  sockets[0].onclose();assert.equal(pulse.summary().state,'error');pulse.stop();
+});
+
+test('the routing pulse exposes a missing minute and reconnects a silent socket', () => {
+  let clock = Date.parse('2026-11-23T10:00:30Z');
+  const sockets = [], surges = [];
+  class Socket {
+    constructor() { sockets.push(this); }
+    send() {}
+    close() { this.closed = true; this.onclose?.(); }
+  }
+  const pulse = createBgpPulse({WebSocketImpl:Socket, now:()=>clock, onSurge:report=>surges.push(report)});
+  try {
+    pulse.start();
+    sockets[0].onopen();
+    for (let minute = 0; minute < 75; minute++) {
+      if (minute !== 73) pulse.count(100,minute < 70 ? 100 : 600);
+      clock += 60_000;
+    }
+    assert.equal(pulse.summary().baselineWindows,14);
+    assert.equal(pulse.summary().last5,null);
+    assert.equal(pulse.summary().surge,false);
+    assert.deepEqual(pulse.summary().minutes.at(-2).slice(1),[null,null]);
+    pulse.check();
+    assert.equal(surges.length,0);
+    clock += 3 * 60_000;
+    pulse.check();
+    assert.equal(sockets[0].closed,true);
+    assert.match(pulse.summary().error,/No routing updates received/);
+    pulse.start();
+    sockets[1].onopen();
+    sockets[0].onclose();
+    assert.equal(pulse.summary().state,'ok');
+    assert.equal(pulse.summary().last5,null);
+  } finally { pulse.stop(); }
 });

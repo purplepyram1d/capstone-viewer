@@ -2,71 +2,35 @@
 
 # Capstone Viewer
 
-Capstone Viewer is a local OSINT dashboard for monitoring cybersecurity and world events. It combines public feeds, an interactive map, a searchable timeline, and a live news wall. The Windows desktop app keeps collecting from the system tray, and reports and settings stay on your device.
+Capstone Viewer is a local OSINT dashboard for cybersecurity, internet disruptions, and world events. The Windows app can keep collecting from the system tray, with reports and settings stored on your device.
 
-## Run from source
+## Demo
 
-Install Node.js 24 or later, then run:
+![Capstone Viewer Operations showing the world map and the event timeline](docs/screenshots/operations.png)
+
+[Live Wall](docs/screenshots/live-wall.png) · [Kiosk](docs/screenshots/kiosk.png) · [Timeline](docs/screenshots/timeline.png) · [Feeds](docs/screenshots/feeds.png) · [Sources](docs/screenshots/sources.png)
+
+[Record and add a GIF or MP4](docs/recording-a-demo.md)
+
+## Run locally
+
+Install Node.js 24 or later.
 
 ```powershell
 npm ci
 npm start
 ```
 
-Open [Operations](http://127.0.0.1:8080/ops). On Windows, use `npm run desktop` to open the Electron app instead. The desktop app allows up to 60 seconds for the local server to start.
+Open [Operations](http://127.0.0.1:8080/ops). On Windows, run `npm run desktop` for the desktop app. Run `npm test` to check the project.
 
-## Main feed and timeline sources
+## What you can do
 
-| Area | Built-in sources | What they contribute |
-| --- | --- | --- |
-| Cybersecurity | CISA Known Exploited Vulnerabilities (KEV), CISA Cybersecurity Advisories, NIST National Vulnerability Database (NVD), ransomware.live | Known exploited vulnerabilities, advisories, critical CVEs, and ransomware claims. |
-| World and earthquakes | BBC World RSS, GDELT, USGS | World news, machine-coded conflict signals that need verification, and earthquakes of magnitude 4.5 or higher. |
-| Internet and routing | IODA, RIPE RIS Live | Outage signals and alerts for spikes in BGP route withdrawals. |
-| AI | OpenAI News RSS | Announcements and research updates from OpenAI. |
+- **Operations** — Filter the globe and timeline by topic, place, source, and evidence. Open a report for the original link and collection history.
+- **Live Wall** — Monitor six default broadcasts, choose backups, and follow headlines by source date or first receipt.
+- **Kiosk** — Loop a Cyber, Geopolitical & Earth, or AI & Robotics desk on a second screen. Select a region, review currently listed reports, or pause to explore the map.
 
-With API credentials, **Cloudflare Radar** adds outage and BGP hijack reports, and **abuse.ch ThreatFox and URLhaus** add malware indicators and malicious URL reports. You can also add public Telegram, Bluesky, and Mastodon feeds, or connect X with an API token. The **Feeds** page shows configured sources and collection health.
+## Feed sources
 
-The Elon and Putin trackers use dedicated Google News RSS searches. The Operations timeline excludes those tracker-specific results.
+CISA KEV, NVD, national cybersecurity centers, and vendor advisories cover cyber. IODA, RIPE RIS Live, and optional Cloudflare Radar cover connectivity. USGS, NOAA, Environment and Climate Change Canada, the FAA, state DOTs, and BBC, Guardian, and UN feeds cover hazards, transport, and world reporting. GDELT aggregates are available for source review in the timeline.
 
-
-## Walkthrough
-
-### Start in Operations
-
-![Operations with status cards, developing stories, a map, and an event timeline](docs/screenshots/operations.png)
-
-*Scan the Internet, Cyber, Conflict & World, and Researcher Chatter status cards, then open a developing story or filter the incoming reports.*
-
-### Inspect the globe and timeline
-
-![Dark globe with labeled event markers beside the event timeline](docs/screenshots/globe-and-timeline.png)
-
-*Switch between a flat map and globe, select a marker to inspect its report, or replay the last 24 hours. Use the timeline filters to narrow by time, feed, or watchlist match.*
-
-### Open the live wall
-
-![Six live news tiles with markets on the left, world clocks on the right, and a headline crawl below](docs/screenshots/live-wall.png)
-
-*The default lineup, left to right across both rows, is France 24 English, Al Jazeera English, Sky News, DW News, ABC News US, and NBC News US. Set **Columns** to **3** to match the screenshot. Use **Listen** for one tile at a time. If you already saved a lineup, choose **Edit streams → Use defaults → Save streams** to load these six. Playback depends on broadcaster availability.*
-
-### Follow the trackers
-
-![Elon tracker with company filters, grouped reports, and the Rosé Pine Dawn theme selected](docs/screenshots/elon-tracker.png)
-
-*Filter coverage of Musk and his companies by subject, time period, and report type, then follow the links to the original coverage.*
-
-![Putin tracker with topic filters for leadership, foreign policy, Ukraine, sanctions, energy, and cyber](docs/screenshots/putin-tracker.png)
-
-*Follow Putin and the Kremlin by topic. The tracker labels official statements and recognized state media so readers can distinguish their provenance.*
-
-### Put Kiosk on another screen
-
-![Kiosk view with a large map, a sourced story card, status panels, and a headline ticker](docs/screenshots/kiosk.png)
-
-*The fullscreen tour rotates through top stories, centers the map on the selected location, and shows a source link. Use the on-screen controls to pause or step through the tour.*
-
-### Choose a theme
-
-The dropdown next to **Fullscreen**, visible in the tracker and kiosk screenshots, includes all eleven Corpus Magnus themes plus **Capstone Night**. The Light and Dark groups make it easy to switch directly to a palette. Your choice is saved and follows open Capstone windows. Earlier screenshots show the original icon control.
-
-Run `npm test` to check the project. See [Third-party components](THIRD_PARTY.md) for bundled libraries and data sources.
+[Walkthrough and full source list](docs/walkthrough.md) · [Third-party components](THIRD_PARTY.md)

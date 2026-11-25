@@ -5,3 +5,11 @@ test('source recovery and analyst recovery remain independent; silence never res
 test('claims are never promoted by repeated reporting; explicit follow supports routine stories',()=>{assert.equal(evidenceClass(report({kind:'ransomware',confidence:'Unconfirmed actor claim'})),'Claim / unverified');assert.equal(evidenceClass(report({kind:'cve',feed_id:'kev',confidence:'Official catalog'})),'Official advisory');const db=new DatabaseSync(':memory:'),api=createDeveloping(db),r=report({score:35,ongoing:undefined,kind:'social',confidence:'Unverified public post'});api.sync([story(r)],[r],{now});assert.equal(api.list().length,0);const t=api.follow('story-a',[story(r)],[r]);assert.equal(t.followed,true);assert.deepEqual(api.list()[0].evidence,['Claim / unverified']);api.update(t.id,{state:'resolved'});api.sync([story(r)],[r],{now:now+1000});assert.equal(api.detail(t.id).state,'resolved');db.close();});
 
 test('explicit recovery in retained data is observed even after leaving the Operations working set',()=>{const db=new DatabaseSync(':memory:');let retained=[];const api=createDeveloping(db,{lookupReports:()=>retained}),r=report();api.sync([story(r)],[r],{now});const id=api.list()[0].id;retained=[report({ongoing:false})];api.sync([],[],{now:now+10000});assert.equal(api.detail(id).source_condition,'Outage ended in source');assert.equal(api.detail(id).state,'watching');db.close();});
+
+test('developing threads use the same bulletin and publisher classifications as the Timeline', () => {
+  assert.equal(evidenceClass(report({kind:'tsunami',confidence:'Official bulletin'})),'Official bulletin');
+  assert.equal(evidenceClass(report({kind:'space_weather',confidence:'Official forecast bulletin'})),'Official bulletin');
+  assert.equal(evidenceClass(report({kind:'report',confidence:'University statement'})),'Attributed statement');
+  assert.equal(evidenceClass(report({kind:'routing',confidence:'Automated detection'})),'Automated routing detection');
+  assert.equal(evidenceClass(report({kind:'incident',confidence:'Victim-confirmed incident, relayed by a tracker'})),'Claim / unverified');
+});

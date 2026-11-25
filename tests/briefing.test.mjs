@@ -8,7 +8,20 @@ test('complete calm history can be quiet; monitoring gaps and failing inputs can
  assert.equal(buildBriefing(base()).quiet,true);
  assert.equal(buildBriefing({...base(),between:[]}).quiet,false);
  assert.equal(buildBriefing({...base(),gaps:[{name:'IODA'}]}).quiet,false);
+ const limited = buildBriefing({...base(),limited:true});
+ assert.equal(limited.quiet,false);
+ assert.match(limited.coverage.join(' '),/live report limit/);
 });
+test('hazard records are labeled by first receipt and link to the retained report and publisher',()=>{
+ const report={id:'mapping-id',title:'Mapping activation',source:'Fixture mapping service',url:'https://example.org/mapping',first_received:at(10)};
+ const result=buildBriefing({...base(),hazardReceipts:{total:1,reports:[report]}});
+ assert.equal(result.quiet,false);
+ assert.equal(result.cards[0].label,'First received in this window');
+ assert.equal(result.cards[0].observed,report.first_received);
+ assert.match(result.cards[0].href,/event=mapping-id/);
+ assert.deepEqual(result.cards[0].links,[{url:report.url,label:report.source}]);
+});
+
 test('initial imports do not become new incidents; later source recovery stays distinct from analyst status',()=>{
  const thread={id:'dev-a',created:at(50),title:'Outage',source_condition:'Outage ended in source',reports:[{id:'r',kind:'outage',ongoing:false,url:'https://example.com/outage',source:'IODA'}],changes:[{kind:'report_added',observed:at(50),report_id:'r'}]};
  assert.equal(buildBriefing({...base(),threads:[thread]}).cards.length,0);

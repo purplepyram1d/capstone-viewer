@@ -2,6 +2,15 @@
 window.CapstoneTheme = (() => {
   const storageKey = 'capstone-theme';
   const groups = {
+    Sleek: [
+      ['obsidian', 'Obsidian'],
+      ['carbon', 'Carbon (true black)'],
+      ['slate', 'Slate'],
+      ['neonnoir', 'Neon Noir'],
+      ['terminal', 'Terminal'],
+      ['matrix', 'Matrix'],
+      ['arctic', 'Arctic (light)']
+    ],
     Light: [
       ['parchment', 'Parchment'],
       ['rosedawn', 'Rosé Pine Dawn'],

@@ -43,18 +43,18 @@ test('missing X credentials make no request, and 429 errors provide backoff with
  await assert.rejects(collectSocial(feed,{userId:'456'},'test',request),error=>error.retryAt>Date.now()+800000&&!error.message.includes('secret'));
 });
 test('social feed settings survive manager recreation, paused feeds do not poll, and cooldown survives restart',async()=>{
- const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE feeds (id TEXT PRIMARY KEY,data TEXT NOT NULL)');let calls=0;const entries=[];
+ const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE feeds (id TEXT PRIMARY KEY,data TEXT NOT NULL)');let calls=0;const entries=[],attempts=[];
  const creds={get:()=>'',status:()=>({configured:false})};const collect=async()=>{calls++;return {events:[],observed:2,runtime:{},usedUrl:'https://t.me/s/testchannel'};};
- let manager=createSocialManager(db,creds,()=>{},events=>entries.push(...events),collect);
+ let manager=createSocialManager(db,creds,()=>{},events=>entries.push(...events),collect, (id, started, success, count) => attempts.push([id, success, count]));
  const feed=manager.add({platform:'telegram',input:'@testchannel',enabled:false});await manager.tick();assert.equal(calls,0);
- manager.update(feed.id,{enabled:true});await manager.tick();assert.equal(calls,1);assert.equal(manager.list()[0].state,'ok');
+ manager.update(feed.id,{enabled:true});await manager.tick();assert.equal(calls,1);assert.equal(manager.list()[0].state,'ok');assert.deepEqual(attempts,[[feed.id,true,0]]);
  manager=createSocialManager(db,creds,()=>{},()=>{},collect);await manager.tick();assert.equal(calls,1);assert.equal(manager.list().length,1);
  manager.remove(feed.id);assert.equal(manager.list().length,0);db.close();
 });
 test('removing a feed during an in-flight poll prevents posts from being reinserted',async()=>{
- const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE feeds (id TEXT PRIMARY KEY,data TEXT NOT NULL)');let finish,writes=0;
- const manager=createSocialManager(db,{get:()=>'',status:()=>({})},()=>{},()=>writes++,()=>new Promise(resolve=>finish=resolve));
- const feed=manager.add({platform:'telegram',input:'@testchannel'});const poll=manager.poll(feed.id);manager.remove(feed.id);finish({events:[],runtime:{}});await poll;assert.equal(writes,0);assert.equal(manager.list().length,0);db.close();
+ const db=new DatabaseSync(':memory:');db.exec('CREATE TABLE feeds (id TEXT PRIMARY KEY,data TEXT NOT NULL)');let finish,writes=0,polls=0;
+ const manager=createSocialManager(db,{get:()=>'',status:()=>({})},()=>{},()=>writes++,()=>new Promise(resolve=>finish=resolve),()=>polls++);
+ const feed=manager.add({platform:'telegram',input:'@testchannel'});const poll=manager.poll(feed.id);manager.remove(feed.id);finish({events:[],runtime:{}});await poll;assert.equal(writes,0);assert.equal(polls,0);assert.equal(manager.list().length,0);db.close();
 });
 test('session credential status never returns the bearer token',async()=>{
  const savedEnv=process.env.X_BEARER_TOKEN;delete process.env.X_BEARER_TOKEN;

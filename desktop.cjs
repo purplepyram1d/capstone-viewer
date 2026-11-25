@@ -9,7 +9,7 @@ const windows = new Set();
 if (!app.requestSingleInstanceLock()) { app.quit(); }
 else {
   // Launching again while the app sits in the tray brings a window back.
-  app.on('second-instance', () => { const win = [...windows][0]; if (win) { if(win.isMinimized())win.restore();win.show();win.focus(); } else if (baseUrl) showView('ops'); });
+  app.on('second-instance', () => { const win = [...windows][0]; if (win) { if(win.isMinimized())win.restore();win.show();win.focus(); } else if (baseUrl) showView(startupView()); });
   app.whenReady().then(start);
 }
 function openExternal(url) { try { if (['https:', 'http:'].includes(new URL(url).protocol)) void shell.openExternal(url); } catch {} }
@@ -63,6 +63,14 @@ function openWindow(view = 'ops', route = view) {
   win.once('ready-to-show', () => { win.show(); if (placement?.maximized) win.maximize(); if (placement?.fullscreen) win.setFullScreen(true); });
   win.webContents.on('did-finish-load',()=>{win.show();console.log(`CAPSTONE_WINDOW_READY ${view} visible=${win.isVisible()}`);});
   win.webContents.on('did-fail-load',(_event,code,description)=>console.error(`CAPSTONE_WINDOW_FAILED ${code} ${description}`));
+  // Accept both forms of the plus shortcut before Electron dispatches menu accelerators.
+  win.webContents.on('before-input-event',(event,input)=>{
+    const primary = process.platform === 'darwin' ? input.meta && !input.control : input.control && !input.meta;
+    if (!primary || input.alt || input.isComposing || input.type !== 'keyDown') return;
+    if (input.key !== '+' && input.key !== '=' && input.code !== 'NumpadAdd') return;
+    event.preventDefault();
+    win.webContents.setZoomLevel(win.webContents.getZoomLevel()+0.5);
+  });
   win.webContents.setWindowOpenHandler(({ url }) => { if (url.startsWith(baseUrl + '/')) { const parsed = new URL(url), target = parsed.pathname.slice(1); if(['ops','wall','sources','feeds','watch','timeline','kiosk','musk','putin','developing'].includes(target))openWindow(target,target+parsed.search+parsed.hash); } else openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (event,url) => { if (!url.startsWith(baseUrl + '/')) {event.preventDefault();openExternal(url);} });
   void win.loadURL(`${baseUrl}/${route}`);
@@ -97,9 +105,15 @@ async function start() {
   const node = fs.existsSync(bundledNode) ? bundledNode : process.env.CAPSTONE_NODE;
   if (!node) { dialog.showErrorBox('Capstone Viewer', 'Node runtime missing. Run the desktop build script first.'); app.quit(); return; }
   // Keep the server origin stable so favorites, stream lists, and curation survive app restarts.
-  // 48179 is dedicated to this app; failures are shown rather than silently moving to a new origin.
+  // Use an explicit override for a separate desktop profile while preserving the default origin.
+  const port = Number(process.env.CAPSTONE_DESKTOP_PORT || 48179);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    dialog.showErrorBox('Capstone Viewer','Choose a local desktop port between 1 and 65535.');
+    app.quit();
+    return;
+  }
   const dataDir = process.env.CAPSTONE_DATA_DIR || path.join(app.getPath('userData'),'feeds');
-  collectorConfig = { root, node, dataDir, credentialFiles: {x:path.join(app.getPath('userData'),'x-credential.bin'),radar:path.join(app.getPath('userData'),'radar-credential.bin'),abusech:path.join(app.getPath('userData'),'abusech-credential.bin')} };
+  collectorConfig = { root, node, dataDir, port, credentialFiles: {x:path.join(app.getPath('userData'),'x-credential.bin'),'x-account':path.join(app.getPath('userData'),'x-account.bin'),'telegram-account':path.join(app.getPath('userData'),'telegram-account.bin'),radar:path.join(app.getPath('userData'),'radar-credential.bin'),abusech:path.join(app.getPath('userData'),'abusech-credential.bin')} };
   startupTimer = setTimeout(() => {
     if (everReady || quitting) return;
     lifecycle('collector-startup-timeout', 'no ready message after 60 s');
@@ -128,8 +142,8 @@ function scheduleRestart(ranFor, errors) {
   restartTimer = setTimeout(() => { restartTimer = null; if (!quitting) spawnCollector({ known: true, clean: false, lastEvent: 'collector-died', lastEventAt: new Date().toISOString(), detail: errors.slice(-300), lastAlive: new Date().toISOString() }); }, delay);
 }
 function spawnCollector(previous) {
-  const { root, node, dataDir, credentialFiles } = collectorConfig;
-  const child = fork(path.join(root,'server.mjs'), [], { execPath: node, cwd: root, env:{...process.env,PORT:'48179',HOST:'127.0.0.1',DATA_DIR:dataDir,CAPSTONE_DESKTOP:'1',CAPSTONE_PREVIOUS_RUN:JSON.stringify(previous)}, stdio:['ignore','pipe','pipe','ipc'] });
+  const { root, node, dataDir, port, credentialFiles } = collectorConfig;
+  const child = fork(path.join(root,'server.mjs'), [], { execPath: node, cwd: root, env:{...process.env,PORT:String(port),HOST:'127.0.0.1',DATA_DIR:dataDir,CAPSTONE_DESKTOP:'1',CAPSTONE_PREVIOUS_RUN:JSON.stringify(previous)}, stdio:['ignore','pipe','pipe','ipc'] });
   collector = child;
   const spawnedAt = Date.now();
   let started = false, ended = false, errors = '';
@@ -161,7 +175,7 @@ function spawnCollector(previous) {
         }else if(message.action==='clear'){if(fs.existsSync(credentialFile))fs.unlinkSync(credentialFile);}
         else throw new Error('Unknown credential operation.');
         if(child.connected)child.send({type:'credential-response',requestId:message.requestId,value});
-      }catch{if(child.connected)child.send({type:'credential-response',requestId:message.requestId,error:'Could not access encrypted desktop credentials. Reconnect '+({radar:'Cloudflare Radar',abusech:'abuse.ch'}[message.name]||'X API access')+'.'});}
+      }catch{if(child.connected)child.send({type:'credential-response',requestId:message.requestId,error:'Could not access encrypted desktop credentials. Reconnect '+({radar:'Cloudflare Radar',abusech:'abuse.ch','x-account':'your X account','telegram-account':'your Telegram account'}[message.name]||'X API access')+'.'});}
       return;
     }
     if(message.type!=='ready'||started||quitting)return;started=true;baseUrl=message.url;lifecycle('ready',baseUrl);
@@ -170,9 +184,9 @@ function spawnCollector(previous) {
     everReady=true;clearTimeout(startupTimer);
     Menu.setApplicationMenu(Menu.buildFromTemplate([
       {label:'Capstone Viewer',submenu:[{label:'Operations window',accelerator:'CmdOrCtrl+1',click:()=>openWindow('ops')},{label:'Live wall window',accelerator:'CmdOrCtrl+2',click:()=>openWindow('wall')},{label:'Sources window',accelerator:'CmdOrCtrl+3',click:()=>openWindow('sources')},{label:'Manage feeds',accelerator:'CmdOrCtrl+4',click:()=>openWindow('feeds')},{label:'Watchlists and alerts',accelerator:'CmdOrCtrl+5',click:()=>openWindow('watch')},{label:'Full event timeline',accelerator:'CmdOrCtrl+6',click:()=>openWindow('timeline')},{label:'Kiosk wall window',accelerator:'CmdOrCtrl+7',click:()=>openWindow('kiosk')},{label:'Elon tracker',accelerator:'CmdOrCtrl+8',click:()=>openWindow('musk')},{label:'Putin tracker',accelerator:'CmdOrCtrl+9',click:()=>openWindow('putin')},{label:'Developing stories',click:()=>openWindow('developing')},{type:'separator'},{role:'quit'}]},
-      {label:'View',submenu:[{role:'reload'},{role:'togglefullscreen'},{role:'zoomIn'},{role:'zoomOut'},{role:'resetZoom'},{type:'separator'},{role:'toggleDevTools'}]},
+      {label:'View',submenu:[{role:'reload'},{role:'togglefullscreen'},{role:'zoomIn'},{role:'zoomOut'},{role:'resetZoom'},startupViewMenu(),{type:'separator'},{role:'toggleDevTools'}]},
       {label:'Edit',submenu:[{role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'}]}
-    ]));buildTray();if(!process.argv.includes('--hidden'))openWindow('ops');ensureStartMenuShortcut();
+    ]));buildTray();if(!process.argv.includes('--hidden'))openWindow(startupView());ensureStartMenuShortcut();
   });
 }
 // Tray mode: closing every window keeps the collector running, so nothing is missed overnight.
@@ -181,6 +195,18 @@ let tray=null,trayStatus='Collecting';
 const prefsFile=()=>path.join(app.getPath('userData'),'desktop-prefs.json');
 function readPrefs(){try{const value=JSON.parse(fs.readFileSync(prefsFile(),'utf8'));return value&&typeof value==='object'?value:{};}catch{return {};}}
 function writePrefs(prefs){try{fs.writeFileSync(prefsFile(),JSON.stringify(prefs));}catch(error){console.error('Could not save desktop preferences',error.message);}}
+const startupViews = [['ops','Operations'],['wall','Live Wall'],['kiosk','Kiosk']];
+function startupView() {
+  const {viewOnLaunch} = readPrefs();
+  return startupViews.some(([view])=>view===viewOnLaunch) ? viewOnLaunch : 'ops';
+}
+function startupViewMenu() {
+  const current = startupView();
+  return {label:'Startup view',submenu:startupViews.map(([view,label])=>({
+    label,type:'radio',checked:view===current,
+    click:()=>writePrefs({...readPrefs(),viewOnLaunch:view})
+  }))};
+}
 function showView(view='ops'){
   const win=[...windows].find(w=>{try{return new URL(w.webContents.getURL()).pathname==='/'+view;}catch{return false;}});
   if(!win){openWindow(view);return;}
@@ -192,7 +218,7 @@ function updateTray(){
   tray.setToolTip(`Capstone Viewer · ${trayStatus}`.slice(0,127));
   tray.setContextMenu(Menu.buildFromTemplate([
     {label:trayStatus.slice(0,90),enabled:false},{type:'separator'},
-    {label:'Open Operations',click:()=>showView('ops')},{label:'Developing stories',click:()=>showView('developing')},{label:'Open kiosk wall',click:()=>showView('kiosk')},{label:'Elon tracker',click:()=>showView('musk')},{label:'Putin tracker',click:()=>showView('putin')},
+    {label:'Open Operations',click:()=>showView('ops')},{label:'Open Live Wall',click:()=>showView('wall')},{label:'Developing stories',click:()=>showView('developing')},{label:'Open kiosk wall',click:()=>showView('kiosk')},{label:'Elon tracker',click:()=>showView('musk')},{label:'Putin tracker',click:()=>showView('putin')},
     {label:'Watchlists and alerts',click:()=>showView('watch')},{label:'Manage feeds',click:()=>showView('feeds')},{type:'separator'},
     // Off by default: it changes what runs at login, so it is the user's choice. Starts in the tray, no window.
     {label:'Start with Windows (collect from login)',type:'checkbox',checked:atLogin,click:item=>{app.setLoginItemSettings({openAtLogin:item.checked,path:process.execPath,args:['--hidden']});updateTray();}},
@@ -203,7 +229,7 @@ function buildTray(){
   if(tray)return;
   // tray.png is drawn for 16 px; Electron picks tray@2x.png on high-DPI screens.
   tray=new Tray(nativeImage.createFromPath(path.join(app.getAppPath(),'assets','tray.png')));
-  tray.on('click',()=>showView('ops'));updateTray();
+  tray.on('click',()=>showView(startupView()));updateTray();
 }
 app.on('window-all-closed',()=>{
   if(quitting)return;
@@ -226,11 +252,29 @@ app.on('before-quit',event=>{
   if(collectorStopping)return;collectorStopping=true;
   const force=setTimeout(()=>{lifecycle('collector-forced','no clean exit within 4 s');child.kill();},4000);
   child.once('exit',()=>{clearTimeout(force);app.quit();});
-  try{if(child.connected)child.send({type:'shutdown'});else child.kill();}catch{child.kill();}
+  if (child.connected) child.send({type:'shutdown'},error=>{if(error)lifecycle('collector-shutdown-warning',error.message);});
 });
 app.on('quit',(_event,code)=>lifecycle('exit-clean',`code ${code}`));
 app.on('render-process-gone',(_event,_contents,details)=>lifecycle('renderer-gone',`reason ${details.reason} exit ${details.exitCode}`));
 app.on('child-process-gone',(_event,details)=>lifecycle('child-process-gone',`type ${details.type} reason ${details.reason} exit ${details.exitCode}`));
 // Log and keep running: a stray main-process error should not stop collection.
 process.on('uncaughtException',error=>{lifecycle('main-exception',error?.stack||String(error));console.error(error);});
-app.whenReady().then(()=>{for(const name of ['suspend','resume','lock-screen','unlock-screen','shutdown'])powerMonitor.on(name,()=>lifecycle('power',name));});
+app.whenReady().then(() => {
+  let suspendedAt = null;
+  for (const name of ['lock-screen','unlock-screen','shutdown']) {
+    powerMonitor.on(name,()=>lifecycle('power',name));
+  }
+  powerMonitor.on('suspend', () => {
+    suspendedAt = Date.now();
+    lifecycle('power','suspend');
+  });
+  powerMonitor.on('resume', () => {
+    lifecycle('power','resume');
+    if (collector?.connected && !quitting) {
+      collector.send({type:'resume',suspendedAt}, error => {
+        if (error && !quitting) lifecycle('collector-resume-warning',error.message);
+      });
+    }
+    suspendedAt = null;
+  });
+});

@@ -1,13 +1,14 @@
 // Groups, desks, curated sources, and clock-rail cities.
 // Each source: d = desk id, n = name, u = url, p = one-line description, t = tags.
 const GROUPS = [
-  { id: "cyber", name: "Cyber Watch", blurb: "Real incidents as they surface: who got hit, what's being exploited, what's spreading." },
-  { id: "world", name: "World Watch", blurb: "Eyes on the physical world: cameras, traffic, weather, conflict." },
+  { id: "cyber", name: "Cyber Watch", blurb: "Official advisories, reported incidents, exploitation evidence, and network measurements." },
+  { id: "world", name: "World Watch", blurb: "World reporting, Earth observations, official bulletins, and public live sources." },
   { id: "ref", name: "Reference", blurb: "The indexes and toolkits behind this desk." }
 ];
 const DESKS = [
   { g: "cyber", id: "ransomware", name: "Ransomware", blurb: "Leak-site trackers that show victims as gangs post them. These are claims; confirm with the victim's own statement." },
   { g: "cyber", id: "exploit", name: "Active Exploitation", blurb: "What attackers are scanning for and exploiting right now, and which CVEs are confirmed in the wild." },
+  { g: "cyber", id: "advisories", name: "Security Advisories", blurb: "Government and coordination-center alerts. Check affected products and follow updates from the publisher." },
   { g: "cyber", id: "iocs", name: "Malware & IOCs", blurb: "Community-fed indicators: malicious URLs, C2 servers, samples and campaign pulses." },
   { g: "cyber", id: "breaches", name: "Breaches & Cyber News", blurb: "Confirmed breaches and the reporters who break incidents first." },
   { g: "cyber", id: "internet", name: "Internet Health", blurb: "Outages, shutdowns, DDoS and censorship, measured country by country." },
@@ -20,6 +21,7 @@ const DESKS = [
   { g: "world", id: "earth", name: "Earth & Disasters", blurb: "Fires, storms, quakes and floods, mostly straight from the agencies that measure them." },
   { g: "world", id: "space", name: "Space", blurb: "Satellites, the ISS, and the sun's weather." },
   { g: "world", id: "audio", name: "Radio & Audio", blurb: "Public scanner and air-traffic audio. Hear an event unfold in real time." },
+  { g: "ref", id: "ai", name: "AI & Robotics", blurb: "Research releases, university work, and robotics reporting." },
   { g: "ref", id: "lists", name: "Lists & Toolkits", blurb: "The curated indexes and toolkits this desk was built from. Start here to find more." }
 ];
 
@@ -43,18 +45,37 @@ const SOURCES = [
   { d:"monitors", n:"Windy", u:"https://www.windy.com", p:"Wind, rain, temperature and pressure forecasts animated across the globe.", t:["live","weather"] },
   { d:"monitors", n:"Worldwide OSINT Tools Map", u:"https://cipher387.github.io/osintmap/", p:"A world map of country-specific databases and OSINT sources.", t:["map","osint","gh"] },
   // ransomware
-  { d:"ransomware", n:"Ransomware.live", u:"https://www.ransomware.live", p:"Near real-time tracker of victims posted to ransomware leak sites, by group, country and sector.", t:["live","leak sites","claims"] },
+  { d:"ransomware", n:"Ransomware.live", collector:"ransomware", u:"https://www.ransomware.live", p:"Near real-time tracker of victims posted to ransomware leak sites, by group, country and sector.", t:["live","leak sites","claims"] },
   { d:"ransomware", n:"RansomLook", u:"https://www.ransomlook.io", p:"Open-source leak-site tracker. Use it to cross-check Ransomware.live.", t:["live","leak sites","open source"] },
+  { d:"ai", n:"Google DeepMind", collector:"deepmind", u:"https://deepmind.google/blog/", p:"Company research updates and announcements.", t:["ai","research"] },
+  { d:"ai", n:"CMU Robotics Institute", collector:"cmu-robotics", u:"https://www.ri.cmu.edu/news/", p:"University robotics research, demonstrations, and lab updates.", t:["robotics","research"] },
+  { d:"ai", n:"IEEE Spectrum Robotics", collector:"ieee-robotics", u:"https://spectrum.ieee.org/topic/robotics/", p:"Reporting on robotics and its applications.", t:["robotics","news"] },
+  { d:"ai", n:"OpenAI News", collector:"openai", u:"https://openai.com/news/", p:"Company announcements and research releases.", t:["ai","research"] },
   // active exploitation
-  { d:"exploit", n:"CISA Known Exploited Vulnerabilities", u:"https://www.cisa.gov/known-exploited-vulnerabilities-catalog", p:"CVEs confirmed exploited in the wild, with federal patch deadlines. A new entry means patch now.", t:["kev","cve","gov"] },
+  { d:"exploit", n:"CISA Known Exploited Vulnerabilities", collector:"kev", u:"https://www.cisa.gov/known-exploited-vulnerabilities-catalog", p:"CVEs confirmed exploited in the wild, with federal patch deadlines. Use the catalog and vendor guidance to check affected assets.", t:["kev","cve","gov"] },
   { d:"exploit", n:"GreyNoise Visualizer", u:"https://viz.greynoise.io", p:"Mass scanning and exploitation attempts by tag. Trending tags show a new CVE getting sprayed.", t:["live","scanning","cve"] },
   { d:"exploit", n:"SANS Internet Storm Center", u:"https://isc.sans.edu", p:"Daily handler diary, DShield sensor data and the Infocon threat level.", t:["live","dshield","diary"] },
   { d:"exploit", n:"Shadowserver Dashboard", u:"https://dashboard.shadowserver.org", p:"Global stats on compromised and vulnerable devices, by country and over time.", t:["live","exposure","by country"] },
-  { d:"exploit", n:"CISA Cybersecurity Advisories", u:"https://www.cisa.gov/news-events/cybersecurity-advisories", p:"Joint advisories on active threat actors, ICS flaws and emergency directives.", t:["advisories","gov","ics"] },
+  { d:"advisories", n:"CISA Cybersecurity Advisories", collector:"cisa", u:"https://www.cisa.gov/news-events/cybersecurity-advisories", p:"Joint advisories on active threat actors, ICS flaws and emergency directives.", t:["advisories","gov","ics"] },
   { d:"exploit", n:"FIRST EPSS", u:"https://www.first.org/epss/", p:"Daily probability that a CVE will be exploited in the next 30 days. Pairs well with KEV.", t:["cve","scoring"] },
+  { d:"advisories", n:"CERT-EU Security Advisories", collector:"cert-eu", u:"https://cert.europa.eu/publications/security-advisories/", p:"EU institutional cyber advisories, affected products, and recommended actions.", t:["advisories","europe","cve"] },
+  { d:"advisories", n:"Japan Vulnerability Notes", collector:"jvn", u:"https://jvn.jp/en/report/all.html", p:"English vulnerability disclosures coordinated by JPCERT/CC and Japan's Information-technology Promotion Agency.", t:["advisories","japan","cve"] },
+  { d:"advisories", n:"JPCERT/CC Security Alerts", collector:"jpcert", u:"https://www.jpcert.or.jp/english/menu_alertsandadvisories.html", p:"Japanese incident coordination notices and guidance in English.", t:["advisories","japan","cve"] },
+  { d:"advisories", n:"Canadian Centre for Cyber Security", u:"https://www.cyber.gc.ca/en/alerts-advisories", p:"Browse Canada's official alerts, technical advisories, and control-system advisories.", t:["advisories","canada","ics"] },
+  { d:"advisories", n:"Australian Cyber Security Centre", u:"https://www.cyber.gov.au/news-and-updates", p:"Browse Australian government alerts, threat reports, advisories, and guidance.", t:["advisories","australia","gov"] },
+  { d:"earth", n:"U.S. Tsunami Warning System", collector:"ntwc", u:"https://www.tsunami.gov/", p:"Current NOAA tsunami bulletins for covered coasts and international Pacific and Caribbean forecasts.", t:["tsunami","gov","hazards"] },
+  { d:"earth", n:"U.S. National Weather Service", collector:"nws-alerts", u:"https://www.weather.gov/", p:"Official forecasts and current watches, warnings, and advisories. Capstone collects severe and extreme bulletins.", t:["weather","hazards","gov"] },
+  { d:"earth", n:"Copernicus EMS Rapid Mapping", collector:"copernicus-mapping", u:"https://mapping.emergency.copernicus.eu/activations/", p:"Public emergency mapping activations and the imagery-based products delivered for each mapped area.", t:["hazards","satellite","mapping","eu"] },
+  { d:"conflict", n:"ReliefWeb humanitarian updates", u:"https://reliefweb.int/updates", p:"UN OCHA’s curated humanitarian situation reports, assessments, and maps from contributing organizations.", t:["humanitarian","reports","un"] },
+  { d:"earth", n:"USGS Volcano Notifications", collector:"usgs-volcano", u:"https://volcanoes.usgs.gov/hans-public/", p:"U.S. observatory notices with volcanic activity, alert levels, and aviation codes as issued.", t:["volcanoes","usgs","hazards"] },
+  { d:"earth", n:"GeoNet Volcano Bulletins", collector:"geonet-volcano", u:"https://www.geonet.org.nz/volcano/vab", p:"Official volcanic activity bulletins and alert levels from New Zealand's GeoNet.", t:["volcanoes","new zealand","hazards"] },
+  { d:"earth", n:"NIFC wildfire records", collector:"nifc-wildfire", u:"https://www.arcgis.com/home/item.html?id=4181a117dc9e43db8598533e29972015", p:"Public federal wildfire records with incident discovery dates, points of origin, and reported size and containment when available.", t:["wildfire","hazards","gov"] },
+  { d:"earth", n:"Environment Agency flood notices", collector:"ea-floods", u:"https://check-for-flooding.service.gov.uk/alerts-and-warnings", p:"Flood alerts, warnings, and published removals from England’s warning service, with area-specific GOV.UK links.", t:["floods","weather","england","gov"] },
+  { d:"earth", n:"MeteoAlarm warning feeds", u:"https://feeds.meteoalarm.org/", p:"Public national weather warnings from EUMETNET members. Select a country to see the original Atom feed.", t:["weather","europe","gov"] },
+  { d:"earth", n:"NASA Earth Observatory Natural Event Tracker", collector:"eonet", u:"https://eonet.gsfc.nasa.gov/", p:"Curated natural-event records with original source references and dated map positions.", t:["earth","observations","nasa"] },
   // malware & iocs
-  { d:"iocs", n:"ThreatFox", u:"https://threatfox.abuse.ch", p:"abuse.ch's shared database of IOCs: IPs, domains and hashes tied to malware families.", t:["live","iocs","abuse.ch"] },
-  { d:"iocs", n:"URLhaus", u:"https://urlhaus.abuse.ch", p:"Malicious URLs used for malware distribution, updated continuously.", t:["live","urls","abuse.ch"] },
+  { d:"iocs", n:"ThreatFox", collector:"threatfox", u:"https://threatfox.abuse.ch", p:"abuse.ch's shared database of IOCs: IPs, domains and hashes tied to malware families.", t:["live","iocs","abuse.ch"] },
+  { d:"iocs", n:"URLhaus", collector:"urlhaus", u:"https://urlhaus.abuse.ch", p:"Malicious URLs used for malware distribution, updated continuously.", t:["live","urls","abuse.ch"] },
   { d:"iocs", n:"MalwareBazaar", u:"https://bazaar.abuse.ch", p:"Freshly submitted malware samples, searchable by family, tag and hash.", t:["live","samples","abuse.ch"] },
   { d:"iocs", n:"Feodo Tracker", u:"https://feodotracker.abuse.ch", p:"Active botnet command-and-control servers and blocklists.", t:["live","c2","abuse.ch"] },
   { d:"iocs", n:"AlienVault OTX", u:"https://otx.alienvault.com", p:"Community threat pulses on active campaigns, with IOCs you can export.", t:["community","iocs"] },
@@ -73,7 +94,10 @@ const SOURCES = [
   { d:"cyber", n:"Imperva Live Threat Map", u:"https://www.imperva.com/cyber-threat-attack-map/", p:"DDoS, hacking attempts and bot traffic mitigated by Imperva.", t:["live","bots","ddos"] },
   // air & sea
   { d:"airsea", n:"ADS-B Exchange", u:"https://globe.adsbexchange.com", p:"Co-op flight tracker that shows unfiltered traffic, including military and blocked aircraft other trackers hide.", t:["live","aviation","military"] },
-  { d:"airsea", n:"Flightradar24", u:"https://www.flightradar24.com", p:"The most popular flight tracker. Fast, polished, good for airline and airport disruptions.", t:["live","aviation"] },
+  { d:"airsea", n:"DriveBC road closures", collector:"drivebc-closures", u:"https://api.open511.gov.bc.ca/help", p:"Provincial closures with explicit active time windows and original event links.", t:["roads","closures","canada","gov"] },
+ { d:"airsea", n:"Caltrans highway closures", u:"https://cwwp2.dot.ca.gov/lane-closure.html", p:"District feeds for California’s highway system. Capstone collects confirmed full mainline closures.", t:["roads","closures","california","gov"] },
+ { d:"airsea", n:"FAA airport status", collector:"faa-airports", u:"https://nasstatus.faa.gov/", p:"Official airport ground stops, delay programs, closure and operating notices, selected delays, and deicing, mapped to airport reference points.", t:["live","aviation","delays","official"] },
+ { d:"airsea", n:"Flightradar24", u:"https://www.flightradar24.com", p:"The most popular flight tracker. Fast, polished, good for airline and airport disruptions.", t:["live","aviation"] },
   { d:"airsea", n:"FlightAware", u:"https://www.flightaware.com", p:"Flight tracking plus airport delay and cancellation stats.", t:["live","aviation","delays"] },
   { d:"airsea", n:"MarineTraffic", u:"https://www.marinetraffic.com", p:"Ship positions from AIS. Watch chokepoints like Suez, Hormuz and the Bosphorus.", t:["live","maritime"] },
   { d:"airsea", n:"VesselFinder", u:"https://www.vesselfinder.com", p:"Free AIS ship tracker with vessel details and port calls.", t:["live","maritime"] },
@@ -83,22 +107,23 @@ const SOURCES = [
   { d:"conflict", n:"GDELT Project", u:"https://www.gdeltproject.org", p:"Monitors world news in 100+ languages and turns it into an open database of events and tone.", t:["news","data","live"] },
   { d:"conflict", n:"Ground News", u:"https://ground.news", p:"Shows how outlets across the political spectrum cover the same story.", t:["news","bias"] },
   // earth & disasters
-  { d:"earth", n:"USGS Latest Earthquakes", u:"https://earthquake.usgs.gov/earthquakes/map/", p:"Live map of earthquakes worldwide as they're recorded.", t:["live","quakes"] },
+  { d:"earth", n:"GDACS disaster alerts", collector:"gdacs", u:"https://www.gdacs.org/Alerts/", p:"Global alerts and modeled impact estimates for natural hazards.", t:["live","hazards"] },
+  { d:"earth", n:"USGS Latest Earthquakes", collector:"usgs", u:"https://earthquake.usgs.gov/earthquakes/map/", p:"Live map of earthquakes worldwide as they're recorded.", t:["live","quakes"] },
   { d:"earth", n:"GDACS", u:"https://www.gdacs.org", p:"UN/EU disaster alert system: quakes, cyclones, floods and volcanoes with impact estimates.", t:["live","alerts"] },
   { d:"earth", n:"NASA FIRMS", u:"https://firms.modaps.eosdis.nasa.gov/map/", p:"Active fire detections from satellites, updated within hours.", t:["live","fires","satellite"] },
   { d:"earth", n:"NASA EONET", u:"https://eonet.gsfc.nasa.gov", p:"Open natural-event tracker: storms, wildfires, icebergs, volcanoes.", t:["live","events"] },
   { d:"earth", n:"National Hurricane Center", u:"https://www.nhc.noaa.gov", p:"Official Atlantic and Eastern Pacific storm tracks and cones.", t:["live","storms"] },
   { d:"earth", n:"Sentinel Hub EO Browser", u:"https://apps.sentinel-hub.com/eo-browser/", p:"Free Sentinel and Landsat imagery. Compare before and after for floods, fires and strikes.", t:["satellite","imagery"] },
   // internet health
-  { d:"internet", n:"Cloudflare Radar", u:"https://radar.cloudflare.com", p:"Internet traffic, outages, attacks and adoption trends by country. Great for spotting shutdowns.", t:["live","outages"] },
-  { d:"internet", n:"IODA", u:"https://ioda.inetintel.cc.gatech.edu", p:"Georgia Tech's Internet Outage Detection and Analysis dashboard, by country and region.", t:["live","outages","shutdowns"] },
+  { d:"internet", n:"Cloudflare Radar", collector:"radar-outages", u:"https://radar.cloudflare.com", p:"Internet traffic, outages, attacks and adoption trends by country. Great for spotting shutdowns.", t:["live","outages"] },
+  { d:"internet", n:"IODA", collector:"ioda", u:"https://ioda.inetintel.cc.gatech.edu", p:"Georgia Tech's Internet Outage Detection and Analysis dashboard, by country and region.", t:["live","outages","shutdowns"] },
   { d:"internet", n:"OONI Explorer", u:"https://explorer.ooni.org", p:"Crowdsourced measurements of website and app blocking around the world.", t:["censorship","data"] },
   { d:"internet", n:"Downdetector", u:"https://downdetector.com", p:"User-reported outages for apps, carriers and services.", t:["live","outages"] },
   // space
   { d:"space", n:"ISS Mimic", u:"https://github.com/ISS-Mimic/Mimic", p:"Open-source project that mirrors live International Space Station telemetry.", t:["live","gh"] },
   { d:"space", n:"N2YO", u:"https://www.n2yo.com", p:"Live satellite tracking and pass predictions for your location.", t:["live","satellites"] },
   { d:"space", n:"Spot the Station", u:"https://spotthestation.nasa.gov", p:"NASA's ISS sighting times for your city.", t:["iss","sightings"] },
-  { d:"space", n:"NOAA Space Weather", u:"https://www.swpc.noaa.gov", p:"Solar flares, geomagnetic storms and aurora forecasts.", t:["live","sun","aurora"] },
+  { d:"space", n:"NOAA Space Weather", collector:"swpc", u:"https://www.swpc.noaa.gov", p:"Solar flares, geomagnetic storms and aurora forecasts.", t:["live","sun","aurora"] },
   // audio
   { d:"audio", n:"Broadcastify", u:"https://www.broadcastify.com", p:"Thousands of public police, fire and EMS scanner feeds.", t:["live","scanner"] },
   { d:"audio", n:"LiveATC", u:"https://www.liveatc.net", p:"Live air traffic control audio from airports worldwide.", t:["live","aviation"] },
