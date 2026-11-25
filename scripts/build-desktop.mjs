@@ -19,7 +19,6 @@ mkdirSync(documentation,{recursive:true});
 copyFileSync(path.join(root,'docs','capstone-banner.png'),path.join(documentation,'capstone-banner.png'));
 cpSync(path.join(root,'docs','screenshots'),path.join(documentation,'screenshots'),{recursive:true});
 copyFileSync(path.join(root,'docs','walkthrough.md'),path.join(documentation,'walkthrough.md'));
-copyFileSync(path.join(root,'docs','recording-a-demo.md'),path.join(documentation,'recording-a-demo.md'));
 writeFileSync(path.join(target,'package.json'),JSON.stringify({name:'capstone-viewer',productName:'Capstone Viewer',version:'0.1.0',main:'desktop.cjs'}));
 // Resolve the production dependency closure so Electron itself is never nested inside the app.
 const copied=new Set();

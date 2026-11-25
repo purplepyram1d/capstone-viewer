@@ -10,8 +10,6 @@ Capstone Viewer is a local OSINT dashboard for cybersecurity, internet disruptio
 
 [Live Wall](docs/screenshots/live-wall.png) · [Kiosk](docs/screenshots/kiosk.png) · [Timeline](docs/screenshots/timeline.png) · [Feeds](docs/screenshots/feeds.png) · [Sources](docs/screenshots/sources.png)
 
-[Record and add a GIF or MP4](docs/recording-a-demo.md)
-
 ## Run locally
 
 Install Node.js 24 or later.
